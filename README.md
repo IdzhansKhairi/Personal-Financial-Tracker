@@ -34,3 +34,96 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
+
+---
+---
+---
+---
+---
+# Self Learning Section
+
+## Project Creation Section
+To create a project do as such:
+
+#### Step 1: Install Node.js:
+1. Go to https://nodejs.org
+2. Download the LTS version (recommended for stability)
+3. Install it like any regular Windows app
+4. After installation, open CMD and run:
+```cmd
+node -v
+npm -v
+```
+
+#### Step 2: Create a New Next.js App
+1. Open VSCode
+2. Open a terminal in VSCode (Ctrl + ~)
+3. Run this command to create a new Next.js project:
+```cmd
+npm create-next-app@latest <app-name>
+```
+
+#### Step 3: Navigate and Run Your App
+```cmd
+cd <app-name>
+npm run dev
+```
+
+## Extra CSS Usage 
+To use a bootstrap, `npm install bootstrap` and import it inside the `layout.tsx` as such:
+```tsx
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './globals.css'; // your own style
+```
+
+To use Ant Design, do as such:
+```cmd
+npm install antd
+```
+```tsx
+import 'antd/dist/reset.css'; 
+```
+
+To use Bootstrap Icon:
+```cmd
+npm install bootstrap-icons
+```
+```tsx
+import 'bootstrap-icons/font/bootstrap-icons.css';
+```
+
+To use SweetAlert2:
+- SweetAlert2 works in plain JS, but you can use React wrapper for easier integration:
+```cmd
+npm install sweetalert2
+npm install @sweetalert2/theme-bootstrap-4
+```
+```tsx
+import Swal from 'sweetalert2';
+import '@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css';
+```
+
+## Push project to github
+1. Create a github repo at https://github.com
+2. Open terminal and change directory to ur project.
+3. Then:
+```cmd
+git init
+git add .
+git commit -m "Initial commit"
+```
+
+4. Pushing using HTTPS (quick, simplest)
+Add the remote and push:
+```cmd
+git branch -M main
+git remote add origin https://github.com/YourUsername/my-project.git
+git push -u origin main
+```
+
+
+
+

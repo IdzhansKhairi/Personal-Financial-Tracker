@@ -1,0 +1,33 @@
+/* Sidebar links default */
+.sidebar-link {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+
+/* Hover effect */
+.sidebar-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white; /* Bootstrap warning color */
+}
+
+/* Active link */
+.sidebar-link.active {
+  font-weight: bold;
+  color: white;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.icon-link {
+  transition: all 0.2s ease-in-out;
+}
+
+.icon-link:hover {
+  background-color: rgba(75, 75, 75, 0.2);
+  border-radius: 50%;
+  font-weight: bold;
+  cursor: pointer;
+}
