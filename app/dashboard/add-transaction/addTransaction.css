@@ -1,0 +1,47 @@
+/* Carousel Arrow Styling */
+
+/* Option 1: Change arrow colors to white with dark background */
+.remainder-carousel .slick-arrow {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    z-index: 10;
+}
+
+.remainder-carousel .slick-arrow:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.remainder-carousel .slick-arrow::before {
+    color: white;
+    font-size: 20px;
+}
+
+/* Position arrows outside the cards */
+.remainder-carousel .slick-prev {
+    left: -45px;
+}
+
+.remainder-carousel .slick-next {
+    right: -45px;
+}
+
+/* Alternative: Keep arrows inside but more visible */
+.remainder-carousel-inside .slick-prev {
+    left: 10px;
+}
+
+.remainder-carousel-inside .slick-next {
+    right: 10px;
+}
+
+/* Style the dots */
+.remainder-carousel .slick-dots li button:before {
+    color: white;
+    font-size: 10px;
+}
+
+.remainder-carousel .slick-dots li.slick-active button:before {
+    color: #52c41a;
+}

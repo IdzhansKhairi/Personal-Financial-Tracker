@@ -9,191 +9,327 @@ import { Pie } from '@ant-design/plots';
 import Swal from 'sweetalert2';
 import { Color } from 'antd/es/color-picker';
 import { FontColorsOutlined } from '@ant-design/icons';
+import { getIncomeSourceLabel, getExpenseUsageLabel } from '@/lib/displayMappings';
+
+// Type for transaction from database
+interface Transaction {
+    transaction_id: number;
+    transaction_date: string;
+    transaction_time: string;
+    transaction_description: string;
+    transaction_amount: number;
+    transaction_category: string;
+    transaction_sub_category: string;
+    transaction_card_choice: string | null;
+    transaction_income_source: string | null;
+    transaction_expense_usage: string | null;
+    transaction_expense_usage_category: string | null;
+    transaction_hobby_category: string | null;
+}
+
+interface AccountBalance {
+    account_id: number;
+    account_category: string;
+    account_sub_category: string;
+    account_card_type: string | null;
+    current_balance: number;
+}
 
 export default function FinancialRecordPage() {
 
+    const [accounts, setAccounts] = useState<AccountBalance[]>([])
+    const [isLoadingAccounts, setIsLoadingAccounts] = useState(true)
+
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Fetch transactions from database
+    useEffect(() => {
+        const fetchTransactions = async () => {
+            try {
+                setIsLoading(true);
+                const response = await fetch('/api/transactions');
+                const data = await response.json();
+                setTransactions(data);
+            } catch (error) {
+                console.error('Failed to fetch transactions:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchTransactions();
+    }, []);
+
+    // Fetch accounts on component mount
+    useEffect(() => {
+        fetchAccounts();
+    }, []);
+
+    // Fetch accounts from database
+    const fetchAccounts = async () => {
+        try {
+            setIsLoadingAccounts(true);
+            const response = await fetch('/api/accounts');
+            const data = await response.json();
+            setAccounts(data);
+        } catch (error) {
+            console.error('Failed to fetch accounts:', error);
+        } finally {
+            setIsLoadingAccounts(false);
+        }
+    };
+
+    // Calculate totals by category
+    const getEwalletData = () => {
+        return accounts
+            .filter(acc => acc.account_category === 'E-Wallet')
+            .map(acc => ({ type: acc.account_sub_category, value: acc.current_balance }));
+    };
+
+    const getCashData = () => {
+        return accounts
+            .filter(acc => acc.account_category === 'Cash')
+            .map(acc => ({ type: acc.account_sub_category, value: acc.current_balance }));
+    };
+
+    const getCardData = () => {
+        // sub_category is division type (Past, Present, Savings, Bliss)
+        return accounts
+            .filter(acc => acc.account_category === 'Card')
+            .map(acc => ({ type: acc.account_sub_category, value: acc.current_balance }));
+    };
+
+    const getGrandTotal = () => {
+        return accounts.reduce((sum, acc) => sum + acc.current_balance, 0);
+    };
+
+    const getTotalByCategory = (category: string) => {
+        return accounts
+            .filter(acc => acc.account_category === category)
+            .reduce((sum, acc) => sum + acc.current_balance, 0);
+    };
+    
+    // Filter out zero values from pie data
+    const getFilteredEwalletData = () => {
+        const data = getEwalletData().filter(d => d.value > 0);
+        return data.length > 0 ? data : [{ type: 'No Data', value: 0 }];
+    };
+
+    const getFilteredCashData = () => {
+        const data = getCashData().filter(d => d.value > 0);
+        return data.length > 0 ? data : [{ type: 'No Data', value: 0 }];
+    };
+
+    const getFilteredCardData = () => {
+        const data = getCardData().filter(d => d.value > 0);
+        return data.length > 0 ? data : [{ type: 'No Data', value: 0 }];
+    };
+
     const ewalletPie = {
-        data: [
-            { type: 'Shoppee Pay', value: 7.00 },
-            { type: 'Touch N Go', value: 5.00 },
-        ],
+        data: getFilteredEwalletData(),
         angleField: 'value',
         colorField: 'type',
-        innerRadius: 0.6,
         label: {
-            text: 'type',
+            text: (d: any) => `${d.value.toFixed(2)}`,
             style: {
                 fontWeight: 'bold',
+                fill: 'white'
             },
         },
-        legend: false,
+        legend: {
+            color: {
+                itemLabelFill: 'white',
+                itemLabelFontWeight: 'bold',
+            },
+        },
+        tooltip: (d: any) => ({
+            name: d.type,
+            value: `MYR ${d.value.toFixed(2)}`,
+        }),
+        innerRadius: 0.6,
         annotations: [
             {
                 type: 'text',
                 style: {
                     text: 'E\nWallet',
+                    fill: 'white',
                     x: '50%',
                     y: '50%',
                     textAlign: 'center',
                     fontSize: 30,
                     fontStyle: 'bold',
-                    fill: 'white'
                 },
             },
         ],
     }
 
     const cashPie = {
-        data: [
-            { type: 'Cash', value: 3.15 },
-            { type: 'Coins', value: 50.50 },
-        ],
+        data: getFilteredCashData(),
         angleField: 'value',
         colorField: 'type',
-        innerRadius: 0.6,
         label: {
-            text: 'type',
+            text: (d: any) => `${d.value.toFixed(2)}`,
             style: {
                 fontWeight: 'bold',
+                fill: 'white'
             },
         },
-        legend: false,
+        legend: {
+            color: {
+                itemLabelFill: 'white',
+                itemLabelFontWeight: 'bold',
+            },
+        },
+        tooltip: (d: any) => ({
+            name: d.type,
+            value: `MYR ${d.value.toFixed(2)}`,
+        }),
+        innerRadius: 0.6,
         annotations: [
             {
                 type: 'text',
                 style: {
                     text: 'Cash',
+                    fill: 'white',
                     x: '50%',
                     y: '50%',
                     textAlign: 'center',
                     fontSize: 30,
                     fontStyle: 'bold',
-                    fill: 'white'
                 },
             },
         ],
     }
 
     const cardPie = {
-        data: [
-            { type: 'Past', value: 830.90 },
-            { type: 'Present', value: 1107.86 },
-            { type: 'Savings', value: 553.93 },
-            { type: 'Bliss', value: 276.97 },
-        ],
+        data: getFilteredCardData(),
         angleField: 'value',
         colorField: 'type',
-        innerRadius: 0.6,
         label: {
-            text: 'type',
+            text: (d: any) => `${d.value.toFixed(2)}`,
             style: {
                 fontWeight: 'bold',
+                fill: 'white'
             },
         },
-        legend: false,
+        legend: {
+            color: {
+                itemLabelFill: 'white',
+                itemLabelFontWeight: 'bold',
+            },
+        },
+        tooltip: (d: any) => ({
+            name: d.type,
+            value: `MYR ${d.value.toFixed(2)}`,
+        }),
+        innerRadius: 0.6,
         annotations: [
             {
                 type: 'text',
                 style: {
-                    text: 'Card',
+                    text: 'Cards',
+                    fill: 'white',
                     x: '50%',
                     y: '50%',
                     textAlign: 'center',
                     fontSize: 30,
                     fontStyle: 'bold',
-                    fill: 'white'
                 },
             },
         ],
     }
 
+    // Format date from YYYY-MM-DD to DD MMM YYYY
+    const formatDate = (dateStr: string) => {
+        const [year, month, day] = dateStr.split('-');
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        return `${day} ${monthNames[parseInt(month) - 1]} ${year}`;
+    };
+
+    // Format time from HH:MM (24-hour) to HH:MM AM/PM (12-hour)
+    const formatTime = (timeStr: string) => {
+        const [hours, minutes] = timeStr.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 || 12; // Convert 0 to 12 for midnight
+        return `${hour12}:${minutes} ${ampm}`;
+    };
+
     const columns = [
         {
             title: 'Date',
-            dataIndex: 'date',
-            key: 'name'
+            dataIndex: 'transaction_date',
+            key: 'transaction_date',
+            sorter: (a: Transaction, b: Transaction) => a.transaction_date.localeCompare(b.transaction_date),
+            render: (value: string) => formatDate(value),
         },
         {
             title: 'Time',
-            dataIndex: 'time',
-            key: 'time'
+            dataIndex: 'transaction_time',
+            key: 'transaction_time',
+            render: (value: string) => formatTime(value),
         },
         {
             title: 'Description',
-            dataIndex: 'description',
-            key: 'description'
+            dataIndex: 'transaction_description',
+            key: 'transaction_description',
         },
         {
             title: 'Amount',
-            dataIndex: 'amount',
-            key: 'amount'
+            key: 'transaction_amount',
+            render: (record: Transaction) => {
+                const isIncome = record.transaction_income_source !== null;
+                return (
+                    <span className={isIncome ? 'text-success fw-bold' : 'text-danger fw-bold'}>
+                        {isIncome ? '+' : '-'} MYR {record.transaction_amount.toFixed(2)}
+                    </span>
+                );
+            },
         },
         {
             title: 'Category',
-            dataIndex: 'category',
-            key: 'category'
+            dataIndex: 'transaction_category',
+            key: 'transaction_category',
+            filters: [
+                { text: 'E-Wallet', value: 'E-Wallet' },
+                { text: 'Cash', value: 'Cash' },
+                { text: 'Card', value: 'Card' },
+            ],
+            onFilter: (value: any, record: Transaction) => record.transaction_category === value,
         },
         {
             title: 'Sub-category',
-            dataIndex: 'subCategory',
-            key: 'subCategory'
+            dataIndex: 'transaction_sub_category',
+            key: 'transaction_sub_category',
         },
         {
-            title: 'Card',
-            dataIndex: 'card',
-            key: 'card'
+            title: 'Card Type',
+            dataIndex: 'transaction_card_choice',
+            key: 'transaction_card_choice',
+            render: (value: string | null) => value || '-',
         },
-    ]
-    
-    const dataSource = [];
+        {
+            title: 'Source / Usage',
+            key: 'source_usage',
+            render: (record: Transaction) => {
+                if (record.transaction_income_source) {
+                    return <Tag color="green">{getIncomeSourceLabel(record.transaction_income_source)}</Tag>;
+                }
+                if (record.transaction_expense_usage) {
+                    return <Tag color="red">{getExpenseUsageLabel(record.transaction_expense_usage)}</Tag>;
+                }
+                return '-';
+            },
+        },
+    ];
 
-    // Helper function to generate random amounts
-    function getRandomAmount() {
-        const isIncome = Math.random() > 0.5;
-        const value = (Math.random() * 500).toFixed(2);
-        return {
-            amount: isIncome ? `+${value}` : `-${value}`,
-            className: isIncome ? 'text-success' : 'text-danger'
-        };
-    }
-
-    // Categories and sub-categories sample
-    const categories = ['Food', 'Transport', 'Salary', 'Shopping', 'Entertainment', 'Utilities'];
-    const subCategories = ['Groceries', 'Taxi', 'Monthly Salary', 'Clothes', 'Movies', 'Electricity'];
-
-    // Cards
-    const cards = ['Visa', 'Mastercard', 'Amex', 'Cash', 'Wallet'];
-
-    // Generate data
-    for (let i = 0; i < 50; i++) {
-        let date = '';
-        if (i < 10) date = '2025-07-01';
-        else if (i < 20) date = '2025-07-05';
-        else if (i < 30) date = '2025-08-12';
-        else if (i < 40) date = '2025-09-20';
-        else date = '2025-10-15';
-
-        const time = `${Math.floor(Math.random() * 12 + 1)}:${Math.floor(Math.random() * 60)
-            .toString()
-            .padStart(2, '0')} ${Math.random() > 0.5 ? 'AM' : 'PM'}`;
-
-        const desc = `Transaction ${i + 1}`;
-
-        const categoryIndex = Math.floor(Math.random() * categories.length);
-
-        const { amount, className } = getRandomAmount();
-
-        dataSource.push({
-            key: i,
-            date,
-            time,
-            description: desc,
-            amount: <span className={className}>{amount}</span>,
-            category: categories[categoryIndex],
-            subCategory: subCategories[categoryIndex],
-            card: cards[Math.floor(Math.random() * cards.length)]
-        });
-    }
+    // Transform transactions for table dataSource
+    const dataSource = transactions.map((t) => ({
+        ...t,
+        key: t.transaction_id,
+    }));
 
     const contentStyle: React.CSSProperties = {
         margin: 0,
@@ -222,7 +358,7 @@ export default function FinancialRecordPage() {
                                 </div>
                                 <div className="col-9">
                                     <h5 className="large fw-bold text-white">E-Wallet</h5>
-                                    <h5 className="text-white small">MYR 10.00</h5>
+                                    <h5 className="text-white small">MYR {getTotalByCategory('Card').toFixed(2)}</h5>
                                 </div>
                             </div>
                             <div className='d-flex justify-content-center' style={{height: '300px'}}>
@@ -241,7 +377,7 @@ export default function FinancialRecordPage() {
                                 </div>
                                 <div className="col-9">
                                     <h5 className="large fw-bold text-white">CASH</h5>
-                                    <h5 className="text-white small">MYR 3.90</h5>
+                                    <h5 className="text-white small">MYR {getTotalByCategory('Cash').toFixed(2)}</h5>
                                 </div>
                             </div>
                             <div className='d-flex justify-content-center' style={{height: '300px'}}>
@@ -260,24 +396,12 @@ export default function FinancialRecordPage() {
                                 </div>
                                 <div className="col-9">
                                     <h5 className="large fw-bold text-white">CARD</h5>
-                                    <h5 className="text-white small">MYR 2769.65</h5>
+                                    <h5 className="text-white small">MYR {getTotalByCategory('Card').toFixed(2)}</h5>
                                 </div>
                             </div>
                             <div className="row">
                                 <div className="col-12 justify-content-center align-items-center" style={{ height: '300px' }}>
                                     <Pie className={'d-flex justify-content-center'} {...cardPie} />
-
-                                    {/* <Carousel className="w-100 h-100" arrows autoplay autoplaySpeed={5000}>
-                                        <div className="d-flex justify-content-center align-items-center h-100">
-                                            <Pie {...cardPie} />
-                                        </div>
-                                        <div className="d-flex justify-content-center align-items-center h-100">
-                                            <Pie {...cashPie} />
-                                        </div>
-                                        <div className="d-flex justify-content-center align-items-center h-100">
-                                            <Pie {...ewalletPie} />
-                                        </div>
-                                    </Carousel> */}
                                 </div>
                             </div>
                             
@@ -291,12 +415,17 @@ export default function FinancialRecordPage() {
             <div className='row mb-5'>
                 <div className='d-flex align-items-center justify-content-end'>
                     <h5 className='fw-bold text-success p-0 m-0 me-2'>TOTAL: </h5>
-                    <h5 className='p-0 m-0 text-success'>MYR 2783.55</h5>
+                    <h5 className='p-0 m-0 text-success'>MYR {getGrandTotal().toFixed(2)}</h5>
                 </div>
             </div>          
 
             <div className='row mb-4'>
-                <Table dataSource={dataSource} columns={columns}/>
+                <Table
+                    dataSource={dataSource}
+                    columns={columns}
+                    loading={isLoading}
+                    pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Total ${total} transactions` }}
+                />
             </div>
         </div>
     )

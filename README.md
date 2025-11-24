@@ -172,7 +172,30 @@ Add "roles" mapper to the scope:
 
 
 
+## Database Infomation Related:
+transaction_list_table
+- transaction_id
+- transaction_date
+- transaction_time
+- transaction_description
+- transaction_amount
+- transaction_category
+- transaction_sub_category
+- transaction_card_choice
+- transaction_income_source
+- transaction_expense_usage
+- transaction_hobby_category
 
+account_balance_table
+- account_id
+- account_category (E-Wallet, Cash, Card)
+- account_sub_category (TnG, Shopee Pay, Notes, Coins, RHB, Maybank, CIMB, etc.)
+- account_card_type (Past/Present/Savings/Bliss - only for Card category, NULL otherwise)
+- current_balance (REAL)
 
-
-
+commitment_list_table
+- commitment_id
+- commitment_name
+- commitment_per_month
+- commitment_per_year
+- 

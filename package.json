@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:setup": "npx tsx scripts/setup-db.ts",
+    "db:seed-accounts": "npx tsx scripts/seed-accounts.ts",
+    "db:migrate-expense-category": "npx tsx scripts/migrate-add-expense-category.ts"
   },
   "dependencies": {
     "@ant-design/charts": "^2.6.6",
@@ -23,6 +26,8 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-transition-group": "^4.4.5",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
     "sweetalert2": "^11.26.3"
   },
   "devDependencies": {
@@ -31,9 +36,12 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-transition-group": "^4.4.12",
+    "@types/sqlite3": "^3.1.11",
     "eslint": "^9",
     "eslint-config-next": "16.0.1",
+    "prisma": "^7.0.0",
     "tailwindcss": "^4",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }
