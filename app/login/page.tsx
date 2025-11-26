@@ -4,12 +4,11 @@ import './login.css'
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
 import Image from 'next/image'
 
 
 export default function LoginPage() {
-  
+
   const router = useRouter();
   const params = useSearchParams();
   const error = params.get("error");
@@ -18,7 +17,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // If NextAuth reports an error (eg, providor/authorize failure), go to /unauthorized
+  // If there's an error parameter, show unauthorized
   useEffect(() => {
     if(error) router.replace("/unauthorized");
   }, [error, router]);
@@ -27,26 +26,35 @@ export default function LoginPage() {
   const [loginError, setLoginError] = useState<string | null>(null);
 
   const handleLogin = async () => {
-    // Use NextAuth Credentials provider (server-side hits Keycloack token endpoint)
     setLoading(true);
     setLoginError(null);
-    const result = await signIn("credentials", {
-      redirect: false,
-      username,
-      password,
-    });
-    setLoading(false);
 
-    if (result?.ok && result.url) {
-      // router.push(result.url);
-      router.push("/dashboard")
-    }
-    else {
-      router.push("/unauthorized")
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Login successful - wait a moment for cookie to be set, then redirect
+        // Use window.location instead of router.push to ensure fresh page load with new cookie
+        window.location.href = "/dashboard";
+      } else {
+        // Login failed
+        setLoginError(data.error || "Invalid username or password");
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setLoginError("An error occurred during login. Please try again.");
+      setLoading(false);
     }
   }
-
-  // const handleLogin = () => router.push("/dashboard"); // redirect after login
 
   return (
 

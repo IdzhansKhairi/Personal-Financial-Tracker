@@ -1,62 +1,66 @@
-import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import { ROLE_PATHS } from "./lib/constants";
+import type { NextRequest } from "next/server";
 
-function canAccessPath(roles: string[], pathname: string): boolean {
-  // Check if any of user's roles allows this path
-  for (const role of roles) {
-    const allowedPaths = ROLE_PATHS[role] || [];
-    for (const path of allowedPaths) {
-      if (pathname === path || pathname.startsWith(path + "/")) {
-        return true;
-      }
-    }
+const SESSION_COOKIE_NAME = "session_token";
+
+export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+
+  // Public routes - always allow
+  if (path === "/login" || path === "/unauthorized" || path === "/") {
+    return NextResponse.next();
   }
-  return false;
-}
 
-export default withAuth(
-  function middleware(req) {
-    const path = req.nextUrl.pathname;
+  // Allow API auth endpoints
+  if (path.startsWith("/api/auth/")) {
+    return NextResponse.next();
+  }
 
-    // Public routes - always allow
-    if (path === "/login" || path === "/unauthorized") {
-      return NextResponse.next();
+  // Check for session token
+  const sessionToken = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+
+  if (!sessionToken) {
+    // No session - redirect to login
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Validate session by calling our session API
+  try {
+    const sessionResponse = await fetch(
+      new URL("/api/auth/session", request.url),
+      {
+        headers: {
+          Cookie: `${SESSION_COOKIE_NAME}=${sessionToken}`,
+        },
+      }
+    );
+
+    if (!sessionResponse.ok) {
+      return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    // Dashboard root - allow authenticated users
-    if (path === "/dashboard") {
-      const response = NextResponse.next();
-      // Add no-cache headers to prevent browser caching
-      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-      response.headers.set('Pragma', 'no-cache');
-      response.headers.set('Expires', '0');
-      return response;
+    const sessionData = await sessionResponse.json();
+
+    if (!sessionData.user) {
+      return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    // Check role-based access for subpaths
-    const roles = (req.nextauth.token as any)?.roles || [];
-    const hasAccess = canAccessPath(roles, path);
-
-    if (!hasAccess) {
-      // Redirect to unauthorized instead of login
-      return NextResponse.redirect(new URL("/dashboard", req.url));
-    }
-
+    // All authenticated users can access all dashboard routes
     // Add no-cache headers to all protected routes
     const response = NextResponse.next();
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
+    response.headers.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate"
+    );
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
     return response;
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
+  } catch (error) {
+    console.error("Middleware session validation error:", error);
+    return NextResponse.redirect(new URL("/login", request.url));
   }
-);
+}
 
 export const config = {
-  matcher: ["/dashboard/:path*"], // protect dashboard & its children
+  matcher: ["/dashboard/:path*", "/api/:path*"],
 };

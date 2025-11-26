@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/sidebar";
 import Header from "../components/header";
@@ -10,12 +10,12 @@ import "./dashboard.css";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(true);
-  const { data: session, status } = useSession();
+  const { user, status, refreshSession } = useAuth();
   const router = useRouter();
 
   // Session validation on mount and visibility change
   useEffect(() => {
-    const checkSession = () => {
+    const checkSession = async () => {
       if (status === "unauthenticated") {
         // User is not authenticated, redirect to login
         router.replace("/login");
@@ -26,14 +26,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     checkSession();
 
     // Check session when user returns to the tab (e.g., after pressing back button)
-    const handleVisibilityChange = () => {
+    const handleVisibilityChange = async () => {
       if (document.visibilityState === "visible") {
+        await refreshSession();
         checkSession();
       }
     };
 
     // Check session when page gains focus
-    const handleFocus = () => {
+    const handleFocus = async () => {
+      await refreshSession();
       checkSession();
     };
 
@@ -44,7 +46,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("focus", handleFocus);
     };
-  }, [status, router]);
+  }, [status, router, refreshSession]);
 
   // Show loading state while checking authentication
   if (status === "loading") {

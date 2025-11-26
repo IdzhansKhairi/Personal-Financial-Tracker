@@ -5,8 +5,7 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { useRouter } from "next/navigation"
-import { signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../contexts/AuthContext";
 import type { MenuProps } from "antd";
 import { Dropdown, Space } from "antd";
 import { UserOutlined, SettingOutlined } from "@ant-design/icons";
@@ -29,12 +28,11 @@ interface HeaderProps {
 export default function header({ menuOpen, setMenuOpen }: HeaderProps) {
 
     const router = useRouter();
+    const { user, logout } = useAuth();
 
-    const { data: session } = useSession();
-    const roles = (session as any)?.roles || [];
-    const firstName = (session as any)?.firstName || '';
-    const lastName = (session as any)?.lastName || '';
-    const fullName = firstName && lastName ? `${firstName} ${lastName}` : session?.user?.name || 'User';
+    const firstName = user?.firstName || '';
+    const lastName = user?.lastName || '';
+    const fullName = firstName && lastName ? `${firstName} ${lastName}` : user?.username || 'User';
 
     const handleLogout = async () => {
         Swal.fire({
@@ -59,7 +57,7 @@ export default function header({ menuOpen, setMenuOpen }: HeaderProps) {
                     showConfirmButton: false
                 }).then(async (result) => {
                     // Clear the session and cookie
-                    await signOut({ redirect: false });
+                    await logout();
 
                     Swal.fire({
                         icon: 'success',
@@ -68,9 +66,6 @@ export default function header({ menuOpen, setMenuOpen }: HeaderProps) {
                         allowEscapeKey: false,
                         confirmButtonText: "OK",
                     }).then(() => {
-                        // Use router.replace instead of router.push to prevent back navigation
-                        router.replace("/login");
-
                         // Clear browser history state to prevent back button access
                         if (window.history && window.history.pushState) {
                             window.history.pushState(null, '', '/login');

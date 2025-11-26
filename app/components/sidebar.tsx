@@ -2,11 +2,10 @@
 
 import { useState } from 'react';
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useAuth } from "../contexts/AuthContext";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ROLE_PATHS } from "@/lib/constants";
 import { LaptopOutlined, NotificationOutlined, UserOutlined, DashboardOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
@@ -40,17 +39,13 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen }: SidebarProps) {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { user } = useAuth();
 
   // Get the active menu key based on current pathname
   const getActiveKey = (): string[] => {
     // Map pathnames to menu keys
     const pathToKey: Record<string, string> = {
       '/dashboard': 'dashboard',
-      '/dashboard/registration': 'registration',
-      '/dashboard/visitor-list': 'visitor-list',
-      '/dashboard/security-list': 'security-list',
-      '/dashboard/report': 'report',
       '/dashboard/finance-dashboard': 'finance-dashboard',
       '/dashboard/add-transaction': 'add-transaction',
       '/dashboard/transaction-record': 'transaction-record',
@@ -67,16 +62,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   const getOpenKeys = (): string[] => {
     const openKeys: string[] = [];
 
-    // Visitor Management submenu
-    if (['/dashboard/registration', '/dashboard/visitor-list'].includes(pathname)) {
-      openKeys.push('visitor-management');
-    }
-
-    // Managerial submenu
-    if (['/dashboard/security-list', '/dashboard/report'].includes(pathname)) {
-      openKeys.push('managerial');
-    }
-
     // Transactions submenu
     if (['/dashboard/add-transaction', '/dashboard/transaction-record'].includes(pathname)) {
       openKeys.push('transactions');
@@ -90,19 +75,10 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     return openKeys;
   };
 
-  // Authentication of what does the user can access.
+  // All authenticated users can access all pages
   const canAccess = (path: string) => {
-    const roles = (session as any)?.roles || [];
-    
-    // If requesting dashboard, always allow (all roles can access it)
-    if (path === "/dashboard") return true;
-    
-    // For specific pages, check if user's role has permission
-    for (const role of roles) {
-      if (ROLE_PATHS[role]?.includes(path)) return true;
-    }
-
-    return false; // ✅ Changed from true to false - deny by default
+    // If user is logged in, they can access everything
+    return !!user;
   }
 
   // Define the sidebar accessibility 
@@ -115,78 +91,8 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     label: <Link href="/dashboard" className="text-decoration-none">Dashboard</Link>
   });
 
-  // sidebarItems.push({
-  //   key: 'registerGroup',
-  //   label: 'Registration',
-  //   type: 'group',
-  // })
-
-  // Visitor Management
-  const visitorChildren: MenuProps['items'] = [];
-  if (canAccess("/dashboard/registration")) {
-    visitorChildren.push({
-      key: 'registration',
-      icon: <i className='bi bi-person-check'></i>,
-      label: <Link href="/dashboard/registration" className='text-decoration-none'>Registration</Link>
-    });
-  }
-  if (canAccess("/dashboard/visitor-list")) {
-    visitorChildren.push({
-      key: 'visitor-list',
-      icon: <i className='bi bi-card-list'></i>,
-      label: <Link href="/dashboard/visitor-list" className='text-decoration-none'>Visitor List</Link>
-    });
-  }
-  if (visitorChildren.length > 0) {
-    sidebarItems.push({
-      key: 'visitor-management',
-      icon: <i className='bi bi-people-fill'></i>,
-      label: <span>Visitor Management</span>,
-      children: visitorChildren
-    });
-  }
-
-  // Managerial
-  const managerialChildren: MenuProps['items'] = [];
-  if (canAccess("/dashboard/security-list")) {
-    managerialChildren.push({
-      key: 'security-list',
-      icon: <i className='bi bi-person-vcard'></i>,
-      label: <Link href="/dashboard/security-list" className='text-decoration-none'>Security List</Link>
-    });
-  }
-  if (canAccess("/dashboard/report")) {
-    managerialChildren.push({
-      key: 'report',
-      icon: <i className='bi bi-file-earmark-text'></i>,
-      label: <Link href="/dashboard/report" className='text-decoration-none'>Report</Link>
-    });
-  }
-  if (managerialChildren.length > 0) {
-    sidebarItems.push({
-      key: 'managerial',
-      icon: <i className='bi bi-building-fill-gear'></i>,
-      label: <span>Managerial</span>,
-      children: managerialChildren
-    });
-  }
-
-  sidebarItems.push({
-    key: 'financeGroup',
-    label: 'Finance',
-    type: 'group',
-  })
-
   // Financial Tracker Apps Related:
   // --------------------------------------------------------------------------------------------
-
-  if(canAccess("/dashboard/finance-dashboard")) {
-    sidebarItems.push({
-      key: 'finance-dashboard',
-      icon: <DashboardOutlined />,
-      label: <Link href="/dashboard/finance-dashboard" className="text-decoration-none">Dashboard Finance</Link>
-    })
-  }
 
   const transactionsChildren: MenuProps['items'] = [];
   if(canAccess("/dashboard/add-transaction")) {
@@ -244,8 +150,6 @@ export default function Sidebar({ isOpen }: SidebarProps) {
   }
   
   // --------------------------------------------------------------------------------------------
-
-
 
   const getLinkClass = (path: string) =>
     pathname === path 
