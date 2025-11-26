@@ -211,3 +211,11 @@ wishlist_list_table
 - URL Link
 - URL Picture
 - wishlist_status (purchased, not_purchased)
+
+
+
+
+
+To transfer information from sqlite to the supabase later:
+- sqlite3 mydb.sqlite .schema > schema.sql
+- sqlite3 mydb.sqlite .dump > dump.sql

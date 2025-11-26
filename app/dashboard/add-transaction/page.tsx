@@ -896,6 +896,7 @@ export default function AddTransactionPage() {
                                                 <optgroup label="Living">
                                                     <option value="food">Food & Drinks</option>
                                                     <option value="groceries">Groceries</option>
+                                                    <option value="stationaries">Stationaries</option>
                                                     <option value="health">Health</option>
                                                     <option value="household">Household</option>
                                                     <option value="personalcare">Personal Care</option>

@@ -3,8 +3,9 @@
 ## 🔐 How Your Authentication Sessions Work
 
 ### Session Duration: **7 Days**
+### Session Policy: **Single Session Only** (One Device at a Time)
 
-When you log in, you stay logged in for **7 days** from the time you logged in, unless you manually log out.
+When you log in, you stay logged in for **7 days** from the time you logged in, unless you manually log out or log in from another device.
 
 ---
 
@@ -17,7 +18,9 @@ You enter username & password
        ↓
 System verifies credentials against database
        ↓
-If valid: Creates a session token (64 random characters)
+If valid: Deletes ALL existing sessions for your user (kicks out other devices)
+       ↓
+Creates a NEW session token (64 random characters)
        ↓
 Stores session in database with expiration date (today + 7 days)
        ↓
@@ -25,6 +28,8 @@ Returns session token to your browser as HTTP-only cookie
        ↓
 You're redirected to dashboard
 ```
+
+**Important:** When you log in, any other devices logged in with your account are automatically logged out!
 
 **Example Session in Database:**
 ```

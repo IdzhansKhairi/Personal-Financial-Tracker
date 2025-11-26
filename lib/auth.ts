@@ -45,9 +45,14 @@ export function generateSessionToken(): string {
   return crypto.randomBytes(32).toString("hex");
 }
 
-// Create a new session for a user
+// Create a new session for a user (deletes all existing sessions for single-device login)
 export async function createSession(userId: number): Promise<string> {
   const db = await openDB();
+
+  // IMPORTANT: Delete all existing sessions for this user (single session only)
+  // This ensures only one device can be logged in at a time
+  await db.run(`DELETE FROM sessions WHERE user_id = ?`, [userId]);
+
   const sessionToken = generateSessionToken();
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + SESSION_DURATION_DAYS);

@@ -60,38 +60,42 @@ export default function LoginPage() {
 
     <div>
 
-      <div className="d-flex align-items-center justify-content-center mb-4">
-        <Image className="me-4" src="/images/jpph_logo.png" alt="Example Logo" width={100} height={100}></Image>
-        <h2 className="text-secondary p-0, m-0"><strong>JPPH Registration</strong></h2>
-      </div>
+      <div className='p-5'>
+        <div className="d-flex align-items-center justify-content-center mb-4">
+          <Image className="" src="/images/finttrack_logo_3.png" alt="Example Logo" width={150} height={150}></Image>
+        </div>
 
-      <div className="p-4 border rounded bg-white">
-        <h3 className="text-center mb-3">Login</h3>
-        <input className="form-control mb-3" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username"
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !loading && username.trim() && password.trim()) {
-              handleLogin();
-            }
-          }}
-        />
-        
-        <div className="position-relative mb-3 d-flex align-items-center justify-content-end">
-          <input className="form-control pe-5" type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password"
+        <div className="p-4 border rounded bg-white" style={{width: '400px'}}>
+          <h3 className="text-center mb-3">Login</h3>
+          <input className="form-control mb-3" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !loading && username.trim() && password.trim()) {
                 handleLogin();
               }
             }}
           />
-          <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} position-absolute pe-3 eye-password-icon`} onClick={() => setShowPassword(!showPassword)}></i>
+          
+          <div className="position-relative mb-3 d-flex align-items-center justify-content-end">
+            <input className="form-control pe-5" type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !loading && username.trim() && password.trim()) {
+                  handleLogin();
+                }
+              }}
+            />
+            <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"} position-absolute pe-3 eye-password-icon`} onClick={() => setShowPassword(!showPassword)}></i>
+          </div>
+          
+          
+          <button className="btn btn-primary w-100" onClick={handleLogin} disabled={ loading || !username.trim() || !password.trim()}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
+          {loginError && <div className="text-danger mb-2">{loginError}</div>}
         </div>
-        
-        
-        <button className="btn btn-primary w-100" onClick={handleLogin} disabled={ loading || !username.trim() || !password.trim()}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-        {loginError && <div className="text-danger mb-2">{loginError}</div>}
       </div>
+      
+
+      
 
     </div>
 

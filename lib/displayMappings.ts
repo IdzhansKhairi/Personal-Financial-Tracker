@@ -22,6 +22,7 @@ export const expenseUsageLabels: Record<string, string> = {
     'health': 'Health',
     'household': 'Household',
     'personalcare': 'Personal Care',
+    'stationaries': 'Stationaries',
 
     // Commitments
     'car': 'Car',

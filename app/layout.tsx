@@ -8,8 +8,13 @@ import type { Metadata } from "next";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "JPPH Dashboard",
-  description: "A web application for testing and learning",
+  title: "Finttrack Dashboard",
+  icons: {
+      icon: 'icon.png', // lives under /public/images
+      shortcut: 'icon.png', // optional
+      apple: 'icon.png', // optional
+    },
+  description: "Your personalized financial tracker",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

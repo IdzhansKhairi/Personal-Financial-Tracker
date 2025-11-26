@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
         id: session.user.id,
         username: session.user.username,
         email: session.user.email,
+        phone_number: session.user.phone_number,
         firstName: session.user.first_name,
         lastName: session.user.last_name,
       },
