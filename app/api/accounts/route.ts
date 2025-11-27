@@ -32,10 +32,13 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Ensure the balance is always stored with 2 decimal places
+    const roundedBalance = parseFloat(Number(current_balance).toFixed(2));
+
     const db = await openDB();
     await db.run(
       "UPDATE account_balance_table SET current_balance = ? WHERE account_id = ?",
-      [current_balance, account_id]
+      [roundedBalance, account_id]
     );
 
     return NextResponse.json({ message: "Account balance updated" });

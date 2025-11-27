@@ -60,12 +60,12 @@ export default function LoginPage() {
 
     <div>
 
-      <div className='p-5'>
+      <div className='p-3 p-md-5'>
         <div className="d-flex align-items-center justify-content-center mb-4">
           <Image className="" src="/images/finttrack_logo_3.png" alt="Example Logo" width={150} height={150}></Image>
         </div>
 
-        <div className="p-4 border rounded bg-white" style={{width: '400px'}}>
+        <div className="p-4 border rounded bg-white login-container mx-auto" style={{width: '400px', maxWidth: '100%'}}>
           <h3 className="text-center mb-3">Login</h3>
           <input className="form-control mb-3" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username"
             onKeyDown={(e) => {

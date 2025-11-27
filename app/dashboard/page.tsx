@@ -4,7 +4,7 @@ import React from 'react';
 
 import { useState, useEffect } from 'react';
 
-import { LineChartOutlined, BarChartOutlined, AreaChartOutlined, PieChartOutlined } from '@ant-design/icons';
+import { LineChartOutlined, BarChartOutlined, AreaChartOutlined, PieChartOutlined, DashboardOutlined } from '@ant-design/icons';
 
 import { Line } from '@ant-design/charts';
 import { Pie } from '@ant-design/plots';
@@ -39,6 +39,9 @@ export default function DashboardPage() {
     const [selectedYear, setSelectedYear] = useState(currentYear);
     const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
+    // Detect if device is mobile for responsive chart labels
+    const [isMobile, setIsMobile] = useState(false);
+
     // Month names for display and selection
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                         'July', 'August', 'September', 'October', 'November', 'December'];
@@ -62,6 +65,18 @@ export default function DashboardPage() {
         };
 
         fetchTransactions();
+    }, []);
+
+    // Detect mobile for responsive label positioning
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     // Helper function: Get Yearly Income Trend data (for Line Chart)
@@ -485,9 +500,10 @@ export default function DashboardPage() {
         label: {
             text: (d: any) => `${d.typeValue}\nMYR ${d.value.toFixed(2)}`,
             style: {
+                fill: 'black',
                 fontWeight: 'bold',
             },
-            position: 'outside'
+            position: isMobile ? 'inside' : 'outside'
         },
         legend: {
             color: {
@@ -574,7 +590,7 @@ export default function DashboardPage() {
                 fontWeight: 'bold',
                 fill: 'black'
             },
-            position: 'spider'
+            position: isMobile ? 'inside' : 'spider'
         },
         legend: {
             color: {
@@ -623,7 +639,7 @@ export default function DashboardPage() {
                 fontWeight: 'bold',
                 fill: 'black'
             },
-            position: 'spider'
+            position: isMobile ? 'inside' : 'spider'
         },
         legend: {
             color: {
@@ -668,7 +684,7 @@ export default function DashboardPage() {
                 fontWeight: 'bold',
                 fill: '#000000'
             },
-            position: 'spider'
+            position: isMobile ? 'inside' : 'spider'
         },
         legend: {
             color: {
@@ -686,10 +702,13 @@ export default function DashboardPage() {
 
     return (
         <div>
-            <div className='d-flex align-items-center justify-content-between mb-3'>
-                <h3 className='text-secondary p-0 m-0'><strong>Finance Dashboard</strong></h3>
-
-                <div className="btn-group" role="group">
+            <div className='d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3'>
+                <div className='d-flex align-items-center title-pages'>
+                    <DashboardOutlined className='fs-3 text-secondary me-2 bi-title'/>
+                    <h3 className='text-secondary p-0 m-0'><strong>Finance Dashboard</strong></h3>
+                </div>  
+                                
+                <div className="btn-group view-mode-buttons dashboard-btn-responsive" role="group">
                     <button type="button" className={`btn ${transactionTypeView === 'overall_overview' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setTypeView('overall_overview')}>
                         Overall Overview
                     </button>
@@ -702,7 +721,7 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            <div className='border-bottom mb-3'></div>
+            <div className='border-bottom my-3'></div>
 
             <div className='row m-1'>
                 <div className='card p-3 px-4 pb-4 bg-secondary'>
@@ -716,36 +735,36 @@ export default function DashboardPage() {
                      */}
                     {transactionTypeView === 'overall_overview' && (
                         <div>
-                            <div className='d-flex align-items-center justify-content-between pb-3'>
-                                <h5 className='fw-bold text-white m-0'>Overall Expenditure</h5>
+                            <div className='d-flex cancel-dflex flex-column flex-md-row align-items-start align-items-md-center justify-content-between pb-3 gap-2'>
+                                <h5 className='fw-bold h-responsive-padding text-white m-0'>Overall Expenditure</h5>
 
                                 {/* Year and Month Selectors */}
-                                <div className='d-flex align-items-center gap-2'>
-                                    <select
-                                        className='form-select form-select-sm'
-                                        value={selectedYear}
-                                        onChange={(e) => setSelectedYear(Number(e.target.value))}
-                                        style={{ width: '100px' }}
-                                    >
-                                        {yearOptions.map(y => (
-                                            <option key={y} value={y}>{y}</option>
-                                        ))}
-                                    </select>
+                                <div className='d-flex flex-wrap flex-md-nowrap align-items-center date-selectors gap-2'>
                                     <select
                                         className='form-select form-select-sm'
                                         value={selectedMonth}
                                         onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                                        style={{ width: '130px' }}
+                                        style={{ minWidth: '130px' }}
                                     >
                                         {monthNames.map((m, index) => (
                                             <option key={m} value={index}>{m}</option>
                                         ))}
                                     </select>
+                                    <select
+                                        className='form-select form-select-sm'
+                                        value={selectedYear}
+                                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                        style={{ minWidth: '100px' }}
+                                    >
+                                        {yearOptions.map(y => (
+                                            <option key={y} value={y}>{y}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 
-                            <div className='row mb-4'>
-                                <div className='col-6'>
+                            <div className='row mb-4 charts-container'>
+                                <div className='col-12 col-md-6 mb-3 mb-md-0 dashboard-cancel-col'>
                                     <div className='card'>
                                         <div className='card-header'>
                                             <LineChartOutlined className='me-2' />
@@ -759,7 +778,7 @@ export default function DashboardPage() {
                                     </div>
                                 </div>
 
-                                <div className='col-6'>
+                                <div className='col-12 col-md-6 mb-3 mb-md-0 dashboard-cancel-col'>
                                     <div className='card'>
                                         <div className='card-header'>
                                             <PieChartOutlined  className='me-2' />
@@ -775,7 +794,7 @@ export default function DashboardPage() {
                             </div>
 
                             <div className='row'>
-                                <div className='col-6'>
+                                <div className='col-12 col-md-6 mb-3 mb-md-0 dashboard-cancel-col'>
                                     <div className='card'>
                                         <div className='card-header'>
                                             <LineChartOutlined className='me-2' />
@@ -789,7 +808,7 @@ export default function DashboardPage() {
                                     </div>
                                 </div>
 
-                                <div className='col-6'>
+                                <div className='col-12 col-md-6 mb-3 mb-md-0 dashboard-cancel-col'>
                                     <div className='card'>
                                         <div className='card-header'>
                                             <BarChartOutlined className='me-2' />
@@ -814,36 +833,36 @@ export default function DashboardPage() {
                      */}
                     {transactionTypeView === 'income_overview' && (
                         <div>
-                            <div className='d-flex align-items-center justify-content-between pb-3'>
-                                <h5 className='fw-bold text-white m-0'>Income Overview</h5>
+                            <div className='d-flex cancel-dflex flex-column flex-md-row align-items-start align-items-md-center justify-content-between pb-3 gap-2'>
+                                <h5 className='fw-bold h-responsive-padding text-white m-0'>Income Overview</h5>
 
                                 {/* Year and Month Selectors */}
-                                <div className='d-flex align-items-center gap-2'>
-                                    <select
-                                        className='form-select form-select-sm'
-                                        value={selectedYear}
-                                        onChange={(e) => setSelectedYear(Number(e.target.value))}
-                                        style={{ width: '100px' }}
-                                    >
-                                        {yearOptions.map(y => (
-                                            <option key={y} value={y}>{y}</option>
-                                        ))}
-                                    </select>
+                                <div className='d-flex flex-wrap flex-md-nowrap align-items-center date-selectors gap-2'>
                                     <select
                                         className='form-select form-select-sm'
                                         value={selectedMonth}
                                         onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                                        style={{ width: '130px' }}
+                                        style={{ minWidth: '130px' }}
                                     >
                                         {monthNames.map((m, index) => (
                                             <option key={m} value={index}>{m}</option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        className='form-select form-select-sm'
+                                        value={selectedYear}
+                                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                        style={{ minWidth: '100px' }}
+                                    >
+                                        {yearOptions.map(y => (
+                                            <option key={y} value={y}>{y}</option>
                                         ))}
                                     </select>
                                 </div>
                             </div>
 
                             <div className='row mb-4'>
-                                <div className='col-6'>
+                                <div className='col-12 col-md-6 mb-3 mb-md-0  dashboard-cancel-col'>
                                     <div className='card'>
                                         <div className='card-header'>
                                             <LineChartOutlined className='me-2' />
@@ -857,7 +876,7 @@ export default function DashboardPage() {
                                     </div>
                                 </div>
 
-                                <div className='col-6'>
+                                <div className='col-12 col-md-6 mb-3 mb-md-0 dashboard-cancel-col'>
                                     <div className='card'>
                                         <div className='card-header'>
                                             <PieChartOutlined  className='me-2' />
@@ -883,36 +902,36 @@ export default function DashboardPage() {
                      */}
                     {transactionTypeView === 'expense_overview' && (
                         <div>
-                            <div className='d-flex align-items-center justify-content-between pb-3'>
-                                <h5 className='fw-bold text-white m-0'>Expense Overview</h5>
+                            <div className='d-flex cancel-dflex flex-column flex-md-row align-items-start align-items-md-center justify-content-between pb-3 gap-2'>
+                                <h5 className='fw-bold h-responsive-padding text-white m-0'>Expense Overview</h5>
 
                                 {/* Year and Month Selectors */}
-                                <div className='d-flex align-items-center gap-2'>
-                                    <select
-                                        className='form-select form-select-sm'
-                                        value={selectedYear}
-                                        onChange={(e) => setSelectedYear(Number(e.target.value))}
-                                        style={{ width: '100px' }}
-                                    >
-                                        {yearOptions.map(y => (
-                                            <option key={y} value={y}>{y}</option>
-                                        ))}
-                                    </select>
+                                <div className='d-flex flex-wrap flex-md-nowrap align-items-center date-selectors gap-2'>
                                     <select
                                         className='form-select form-select-sm'
                                         value={selectedMonth}
                                         onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                                        style={{ width: '130px' }}
+                                        style={{ minWidth: '130px' }}
                                     >
                                         {monthNames.map((m, index) => (
                                             <option key={m} value={index}>{m}</option>
+                                        ))}
+                                    </select>
+                                    <select
+                                        className='form-select form-select-sm'
+                                        value={selectedYear}
+                                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                        style={{ minWidth: '100px' }}
+                                    >
+                                        {yearOptions.map(y => (
+                                            <option key={y} value={y}>{y}</option>
                                         ))}
                                     </select>
                                 </div>
                             </div>
 
                             <div className='row mb-4'>
-                                <div className='col-6'>
+                                <div className='col-12 col-md-6 mb-3 mb-md-0  dashboard-cancel-col'>
                                     <div className='card'>
                                         <div className='card-header'>
                                             <LineChartOutlined className='me-2' />
@@ -926,7 +945,7 @@ export default function DashboardPage() {
                                     </div>
                                 </div>
 
-                                <div className='col-6'>
+                                <div className='col-12 col-md-6 mb-3 mb-md-0  dashboard-cancel-col'>
                                     <div className='card'>
                                         <div className='card-header'>
                                             <PieChartOutlined  className='me-2' />
@@ -942,7 +961,7 @@ export default function DashboardPage() {
                             </div>
 
                             <div className='row'>
-                                <div className='col-6'>
+                                <div className='col-12 col-md-6 mb-3 mb-md-0  dashboard-cancel-col'>
                                     <div className='card'>
                                         <div className='card-header'>
                                             <BarChartOutlined className='me-2' />
@@ -955,7 +974,7 @@ export default function DashboardPage() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className='col-6'>
+                                <div className='col-12 col-md-6 mb-3 mb-md-0  dashboard-cancel-col'>
                                     <div className='card'>
                                         <div className='card-header'>
                                             <PieChartOutlined  className='me-2' />

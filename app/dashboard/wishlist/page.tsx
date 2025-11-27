@@ -24,6 +24,7 @@ export default function WishlistPage() {
     const [purchasedItems, setPurchasedItems] = useState<WishlistItem[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [savingsBalance, setSavingsBalance] = useState(0)
+    const [isMobile, setIsMobile] = useState(false)
 
     const categories = ['Gunpla', 'Music', 'Climbing', 'Decoration', 'Technology', 'Others'];
 
@@ -70,6 +71,18 @@ export default function WishlistPage() {
         fetchWishlistItems();
         fetchPurchasedItems();
         fetchSavingsBalance();
+    }, []);
+
+    // Detect mobile for responsive column widths
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     // Calculate progress percentage
@@ -159,12 +172,12 @@ export default function WishlistPage() {
                             ${categories.map(c => `<option value='${c}' ${item.wishlist_category === c ? 'selected' : ''}>${c}</option>`).join('')}
                         </select>
                     </div>
-                    <div class='row mb-4'>
-                        <div class='col-6'>
+                    <div class='row'>
+                        <div class='col-6 cancel-col mb-4 cancel-px'>
                             <label class='form-label'>Estimated Price (MYR)</label>
                             <input type='number' class='form-control' value='${item.wishlist_estimate_price || ''}' disabled></input>
                         </div>
-                        <div class='col-6'>
+                        <div class='col-6 cancel-col mb-4 cancel-px'>
                             <label class='form-label'>Final Price (MYR)</label>
                             <input type='number' class='form-control' value='${item.wishlist_final_price || ''}' disabled></input>
                         </div>
@@ -624,7 +637,7 @@ export default function WishlistPage() {
         <div>
             <div className="d-flex align-items-center justify-content-between mb-3">
                 <div className='d-flex align-items-center'>
-                    <i className='bi bi-gift fs-3 text-secondary me-2'></i>
+                    <i className='bi bi-gift fs-3 text-secondary me-2 bi-title'></i>
                     <h3 className='text-secondary p-0 m-0'><strong>Wishlists</strong></h3>
                 </div>
                 <button className="btn btn-outline-secondary d-flex align-items-center" onClick={addWishlist}>
@@ -663,6 +676,7 @@ export default function WishlistPage() {
                         loading={isLoading}
                         rowKey="wishlist_id"
                         pagination={{ pageSize: 10 }}
+                        scroll={{ x: isMobile ? 'max-content' : undefined }}
                     />
                 </div>
             </div>
@@ -680,6 +694,7 @@ export default function WishlistPage() {
                         columns={purchasedColumns}
                         rowKey="wishlist_id"
                         pagination={{ pageSize: 10 }}
+                        scroll={{ x: isMobile ? 'max-content' : undefined }}
                     />
                 </div>
             </div>

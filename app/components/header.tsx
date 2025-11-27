@@ -114,7 +114,7 @@ export default function header({ menuOpen, setMenuOpen }: HeaderProps) {
                     </div>
                 </div>
             `,
-            width: '700px',
+            width: typeof window !== 'undefined' && window.innerWidth <= 768 ? '90vw' : '700px',
             showCancelButton: true,
             confirmButtonText: "Edit",
             confirmButtonColor: "#0d6efd",
@@ -160,7 +160,7 @@ export default function header({ menuOpen, setMenuOpen }: HeaderProps) {
                     </div>
                 </div>
             `,
-            width: '700px',
+            width: typeof window !== 'undefined' && window.innerWidth <= 768 ? '90vw' : '700px',
             showDenyButton: true,
             showCancelButton: true,
             confirmButtonText: "Save Changes",
@@ -278,7 +278,7 @@ export default function header({ menuOpen, setMenuOpen }: HeaderProps) {
                     </div>
                 </div>
             `,
-            width: '600px',
+            width: typeof window !== 'undefined' && window.innerWidth <= 768 ? '90vw' : '600px',
             showCancelButton: true,
             confirmButtonText: "Change Password",
             confirmButtonColor: "#ffc107",
@@ -417,10 +417,13 @@ export default function header({ menuOpen, setMenuOpen }: HeaderProps) {
                     <a className={`text-dark text-decoration-none p-1 mx-3 ms-2 menu-button ${menuOpen ? "open" : ""}`} onClick={() => setMenuOpen(!menuOpen)}>
                         <i className={`d-flex bi ${menuOpen ? "bi-x" : "bi-list"} text-white fs-3`} />
                     </a>
-                    
+
                     <div className="d-flex align-items-center ms-2">
-                        <Image className="me-3" src="/images/finttrack_logo_3.png" alt="Example Logo" width={40} height={40}></Image>
-                        <h5 className="text-white medium p-0, m-0"><strong>Financial Tracker</strong></h5>
+                        <Link href="/dashboard">
+                            <Image className="me-2 me-md-3" src="/images/finttrack_logo_3.png" alt="Example Logo" width={40} height={40}></Image>
+                        </Link>
+                        
+                        <h5 className="text-white medium p-0 m-0 d-none d-sm-block"><strong>Financial Tracker</strong></h5>
                     </div>
                 </div>
 
@@ -433,9 +436,9 @@ export default function header({ menuOpen, setMenuOpen }: HeaderProps) {
                         </Space>
                         </a>
                     </Dropdown>
-                    <span className="text-white ms-2"><strong>{fullName}</strong></span>
+                    <span className="text-white ms-2 d-none d-md-inline"><strong>{fullName}</strong></span>
                 </div>
-                
+
 
             </div>
         </div>

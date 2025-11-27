@@ -45,3 +45,21 @@
 .remainder-carousel .slick-dots li.slick-active button:before {
     color: #52c41a;
 }
+
+/* Smooth collapse transition for recent transactions */
+#recentTransactionsCollapse {
+    transition: height 0.35s ease, opacity 0.35s ease;
+    overflow: hidden;
+}
+
+#recentTransactionsCollapse.collapsing {
+    transition: height 0.35s ease;
+}
+
+#recentTransactionsCollapse.collapse:not(.show) {
+    display: none;
+}
+
+#recentTransactionsCollapse.collapse.show {
+    display: block;
+}

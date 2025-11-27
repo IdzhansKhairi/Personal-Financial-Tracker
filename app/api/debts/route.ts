@@ -49,6 +49,9 @@ export async function POST(request: Request) {
             status
         } = body;
 
+        // Ensure the amount is always stored with 2 decimal places
+        const roundedAmount = parseFloat(Number(amount).toFixed(2));
+
         const result = await db.run(
             `INSERT INTO debts_table (
                 debt_type,
@@ -64,7 +67,7 @@ export async function POST(request: Request) {
                 created_date,
                 due_date || null,
                 person_name,
-                amount,
+                roundedAmount,
                 notes || null,
                 status || 'pending'
             ]
@@ -98,6 +101,9 @@ export async function PUT(request: Request) {
             settled_date
         } = body;
 
+        // Ensure the amount is always stored with 2 decimal places
+        const roundedAmount = parseFloat(Number(amount).toFixed(2));
+
         await db.run(
             `UPDATE debts_table SET
                 debt_type = ?,
@@ -114,7 +120,7 @@ export async function PUT(request: Request) {
                 created_date,
                 due_date || null,
                 person_name,
-                amount,
+                roundedAmount,
                 notes || null,
                 status,
                 settled_date || null,

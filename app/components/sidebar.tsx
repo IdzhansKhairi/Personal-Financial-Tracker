@@ -35,11 +35,19 @@ const geistMono = Geist_Mono({
 
 interface SidebarProps {
   isOpen: boolean;
+  onMenuClick?: () => void;
 }
 
-export default function Sidebar({ isOpen }: SidebarProps) {
+export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useAuth();
+
+  // Handle menu item click - close sidebar on mobile
+  const handleMenuClick = () => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768 && onMenuClick) {
+      onMenuClick();
+    }
+  };
 
   // Get the active menu key based on current pathname
   const getActiveKey = (): string[] => {
@@ -167,6 +175,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             className='bg-dark h-100'
             theme="dark"
             items={sidebarItems}
+            onClick={handleMenuClick}
           />
       </Sider>
     </div>

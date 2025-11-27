@@ -12,6 +12,7 @@ export const incomeSourceLabels: Record<string, string> = {
     'refund': 'Refund',
     'tally': 'Tally',
     'update': 'Update',
+    'move_money': 'Move Money',
     'others': 'Others',
 };
 

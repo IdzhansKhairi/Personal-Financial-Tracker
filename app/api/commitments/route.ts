@@ -42,6 +42,10 @@ export async function POST(request: Request) {
             commitment_start_year
         } = body;
 
+        // Ensure the amounts are always stored with 2 decimal places
+        const roundedPerMonth = parseFloat(Number(commitment_per_month).toFixed(2));
+        const roundedPerYear = parseFloat(Number(commitment_per_year).toFixed(2));
+
         const result = await db.run(
             `INSERT INTO commitment_list_table (
                 commitment_name,
@@ -56,8 +60,8 @@ export async function POST(request: Request) {
             [
                 commitment_name,
                 commitment_description || null,
-                commitment_per_month,
-                commitment_per_year,
+                roundedPerMonth,
+                roundedPerYear,
                 commitment_notes || null,
                 commitment_status || 'Active',
                 commitment_start_month || null,
@@ -93,6 +97,10 @@ export async function PUT(request: Request) {
             commitment_start_year
         } = body;
 
+        // Ensure the amounts are always stored with 2 decimal places
+        const roundedPerMonth = parseFloat(Number(commitment_per_month).toFixed(2));
+        const roundedPerYear = parseFloat(Number(commitment_per_year).toFixed(2));
+
         await db.run(
             `UPDATE commitment_list_table SET
                 commitment_name = ?,
@@ -107,8 +115,8 @@ export async function PUT(request: Request) {
             [
                 commitment_name,
                 commitment_description || null,
-                commitment_per_month,
-                commitment_per_year,
+                roundedPerMonth,
+                roundedPerYear,
                 commitment_notes || null,
                 commitment_status,
                 commitment_start_month || null,

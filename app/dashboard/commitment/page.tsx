@@ -36,6 +36,7 @@ export default function CommitmentPage() {
     const [paymentStatuses, setPaymentStatuses] = useState<PaymentStatus[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [checkboxLoading, setCheckboxLoading] = useState<number | null>(null)
+    const [isMobile, setIsMobile] = useState(false)
 
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth(); // 0-indexed (0 = January)
@@ -115,6 +116,18 @@ export default function CommitmentPage() {
         }
     }, [selectedMonth, selectedYear]);
 
+    // Detect mobile for responsive column widths
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     // Calculate payment statistics
     const getPaidCount = () => {
         return paymentStatuses.filter(p => p.payment_status === 1).length;
@@ -166,16 +179,16 @@ export default function CommitmentPage() {
                         <label class='form-label'>Description</label>
                         <textarea id='commitment-description' class='form-control' placeholder='Enter commitment description'></textarea>
                     </div>
-                    <div class='mb-4'>
+                    <div class=''>
                         <div class='row'>
-                            <div class='col-6'>
+                            <div class='col-6 cancel-col mb-4 cancel-px'>
                                 <label class='form-label'>Monthly Total <span class='text-danger'>*</span></label>
                                 <div class='input-group'>
                                     <span class='input-group-text'>MYR</span>
                                     <input id='commitment-monthly' type='number' step='0.01' class='form-control' placeholder='0.00'></input>
                                 </div>
                             </div>
-                            <div class='col-6'>
+                            <div class='col-6 cancel-col mb-4 cancel-px'>
                                 <label class='form-label'>Yearly Total (Auto)</label>
                                 <div class='input-group'>
                                     <span class='input-group-text'>MYR</span>
@@ -262,16 +275,16 @@ export default function CommitmentPage() {
                         <label class='form-label'>Description</label>
                         <textarea id='edit-commitment-description' class='form-control' placeholder='Enter commitment description'>${commitment.commitment_description || ''}</textarea>
                     </div>
-                    <div class='mb-4'>
+                    <div class=''>
                         <div class='row'>
-                            <div class='col-6'>
+                            <div class='col-6 cancel-col mb-4 cancel-px'>
                                 <label class='form-label'>Monthly Total <span class='text-danger'>*</span></label>
                                 <div class='input-group'>
                                     <span class='input-group-text'>MYR</span>
                                     <input id='edit-commitment-monthly' type='number' step='0.01' class='form-control' value='${commitment.commitment_per_month}'></input>
                                 </div>
                             </div>
-                            <div class='col-6'>
+                            <div class='col-6 cancel-col mb-4 cancel-px'>
                                 <label class='form-label'>Yearly Total (Auto)</label>
                                 <div class='input-group'>
                                     <span class='input-group-text'>MYR</span>
@@ -402,16 +415,16 @@ export default function CommitmentPage() {
                         <label class='form-label'>Description</label>
                         <textarea id='future-commitment-description' class='form-control' placeholder='Enter commitment description'></textarea>
                     </div>
-                    <div class='mb-4'>
+                    <div class=''>
                         <div class='row'>
-                            <div class='col-6'>
+                            <div class='col-6 cancel-col mb-4 cancel-px'>
                                 <label class='form-label'>Monthly Total <span class='text-danger'>*</span></label>
                                 <div class='input-group'>
                                     <span class='input-group-text'>MYR</span>
                                     <input id='future-commitment-monthly' type='number' step='0.01' class='form-control' placeholder='0.00'></input>
                                 </div>
                             </div>
-                            <div class='col-6'>
+                            <div class='col-6 cancel-col mb-4 cancel-px'>
                                 <label class='form-label'>Yearly Total (Auto)</label>
                                 <div class='input-group'>
                                     <span class='input-group-text'>MYR</span>
@@ -423,13 +436,13 @@ export default function CommitmentPage() {
                     <div class='mb-4'>
                         <label class='form-label'>Start Date (Optional)</label>
                         <div class='row'>
-                            <div class='col-6'>
+                            <div class='col-6 cancel-col mb-4 cancel-px'>
                                 <select id='future-commitment-month' class='form-select'>
                                     <option value=''>-- Select Month --</option>
                                     ${monthNames.map((m, i) => `<option value='${i}'>${m}</option>`).join('')}
                                 </select>
                             </div>
-                            <div class='col-6'>
+                            <div class='col-6 cancel-col mb-4 cancel-px'>
                                 <select id='future-commitment-year' class='form-select'>
                                     <option value=''>-- Select Year --</option>
                                     ${yearOptions.map(y => `<option value='${y}'>${y}</option>`).join('')}
@@ -613,11 +626,13 @@ export default function CommitmentPage() {
             title: 'Name',
             dataIndex: 'commitment_name',
             key: 'commitment_name',
+            width: isMobile ? 200 : undefined,
         },
         {
             title: 'Description',
             dataIndex: 'commitment_description',
             key: 'commitment_description',
+            width: isMobile ? 200 : undefined,
             render: (text) => text || '-'
         },
         {
@@ -636,6 +651,7 @@ export default function CommitmentPage() {
             title: 'Notes',
             dataIndex: 'commitment_notes',
             key: 'commitment_notes',
+            width: isMobile ? 200 : undefined,
             render: (text) => text || '-'
         },
         {
@@ -714,13 +730,13 @@ export default function CommitmentPage() {
 
     return (
         <div>
-            <div className="d-flex align-items-center justify-content-between mb-3">
-                <div className='d-flex align-items-center'>
-                    <i className='bi bi-cash-stack fs-3 text-secondary me-2'></i>
+            <div className="d-flex align-items-center justify-content-between mb-3 commitment-header-wrapper">
+                <div className='d-flex align-items-center title-pages'>
+                    <i className='bi bi-cash-stack fs-3 text-secondary me-2 bi-title'></i>
                     <h3 className='text-secondary p-0 m-0'><strong>Commitments</strong></h3>
-                </div>  
+                </div>
 
-                <div className="btn-group" role="group">
+                <div className="btn-group commitment-button-group" role="group">
                     <button type="button" className={`btn ${commitmentsTypeView === 'commitment_status' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setCommitmentTypeView('commitment_status')}>
                         Commitment Status
                     </button>
@@ -739,7 +755,7 @@ export default function CommitmentPage() {
                 <div>
                     {/* Summary Cards */}
                     <div className='row mb-3'>
-                        <div className='col-6'>
+                        <div className='col-6 cancel-left-pad-mar'>
                             <div className='card bg-success text-white'>
                                 <div className='card-body'>
                                     <div className='d-flex justify-content-between align-items-center'>
@@ -753,7 +769,7 @@ export default function CommitmentPage() {
                                 </div>
                             </div>
                         </div>
-                        <div className='col-6'>
+                        <div className='col-6 cancel-right-pad-mar'>
                             <div className='card bg-warning text-white'>
                                 <div className='card-body'>
                                     <div className='d-flex justify-content-between align-items-center'>
@@ -770,21 +786,21 @@ export default function CommitmentPage() {
                     </div>
 
                     <div className="card">
-                        <div className="card-header d-flex align-items-center justify-content-between p-3">
-                            <div className="d-flex align-items-center">
+                        <div className="card-header d-flex align-items-center justify-content-between p-3 cancel-dflex">
+                            <div className="d-flex align-items-center commitment-padding-bottom">
                                 <i className="bi bi-card-checklist text-secondary fw-bold me-2"></i>
                                 <h5 className="fw-bold text-secondary m-0 p-0">Commitment Status</h5>
                             </div>
 
                              <div className='d-flex align-items-center gap-2'>
-                                <select className='form-select form-select-sm' value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))} style={{ width: '100px' }}>
-                                    {yearOptions.map(y => (
-                                        <option key={y} value={y}>{y}</option>
-                                    ))}
-                                </select>
-                                <select className='form-select form-select-sm' value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))} style={{ width: '130px' }}>
+                                <select className='form-select form-select-sm cancel-from-width' value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))} style={{ width: '130px' }}>
                                     {monthNames.map((m, index) => (
                                         <option key={m} value={index}>{m}</option>
+                                    ))}
+                                </select>
+                                <select className='form-select form-select-sm cancel-from-width' value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))} style={{ width: '100px' }}>
+                                    {yearOptions.map(y => (
+                                        <option key={y} value={y}>{y}</option>
                                     ))}
                                 </select>
                             </div>
@@ -797,6 +813,7 @@ export default function CommitmentPage() {
                                 loading={isLoading}
                                 rowKey="commitment_id"
                                 pagination={false}
+                                scroll={{ x: isMobile ? 'max-content' : undefined }}
                             />
                         </div>
                     </div>
@@ -839,13 +856,14 @@ export default function CommitmentPage() {
                                 loading={isLoading}
                                 rowKey="commitment_id"
                                 pagination={{ pageSize: 10 }}
+                                scroll={{ x: isMobile ? 'max-content' : undefined }}
                             />
                         </div>
                     </div>
 
                     {/* Inactive and On Hold Cards */}
                     <div className='row'>
-                        <div className='col-6'>
+                        <div className='col-6 cancel-col px-0 pe-2 commitment-no-pad-mar-x'>
                             <div className='card p-3 px-4 pb-4'>
                                 <div className='d-flex align-items-center pb-3'>
                                     <i className="bi bi-archive me-2 text-secondary"></i>
@@ -857,10 +875,11 @@ export default function CommitmentPage() {
                                     rowKey="commitment_id"
                                     pagination={false}
                                     size="small"
+                                    scroll={{ x: isMobile ? 'max-content' : undefined }}
                                 />
                             </div>
                         </div>
-                        <div className='col-6'>
+                        <div className='col-6 cancel-col px-0 ps-2 commitment-no-pad-mar-x'>
                             <div className='card p-3 px-4 pb-4'>
                                 <div className='d-flex align-items-center pb-3'>
                                     <i className="bi bi-pause-circle me-2 text-info"></i>
@@ -872,6 +891,7 @@ export default function CommitmentPage() {
                                     rowKey="commitment_id"
                                     pagination={false}
                                     size="small"
+                                    scroll={{ x: isMobile ? 'max-content' : undefined }}
                                 />
                             </div>
                         </div>
@@ -883,7 +903,7 @@ export default function CommitmentPage() {
                 <div>
                     {/* Summary Cards */}
                     <div className='row mb-3'>
-                        <div className='col-4'>
+                        <div className='col-4 cancel-col'>
                             <div className='card bg-success text-white'>
                                 <div className='card-body'>
                                     <h6 className='mb-1'>Current Commitments</h6>
@@ -891,7 +911,7 @@ export default function CommitmentPage() {
                                 </div>
                             </div>
                         </div>
-                        <div className='col-4'>
+                        <div className='col-4 cancel-col'>
                             <div className='card bg-warning text-white'>
                                 <div className='card-body'>
                                     <h6 className='mb-1'>Pending Commitments</h6>
@@ -899,7 +919,7 @@ export default function CommitmentPage() {
                                 </div>
                             </div>
                         </div>
-                        <div className='col-4'>
+                        <div className='col-4 cancel-col'>
                             <div className='card bg-danger text-white'>
                                 <div className='card-body'>
                                     <h6 className='mb-1'>Total After Pending</h6>
@@ -929,13 +949,14 @@ export default function CommitmentPage() {
                                 loading={isLoading}
                                 rowKey="commitment_id"
                                 pagination={{ pageSize: 10 }}
+                                scroll={{ x: isMobile ? 'max-content' : undefined }}
                             />
                         </div>
                     </div>
 
                     {/* Inactive and On Hold Cards */}
                     <div className='row'>
-                        <div className='col-6'>
+                        <div className='col-6 cancel-col commitment-no-pad-mar-x'>
                             <div className='card p-3 px-4 pb-4'>
                                 <div className='d-flex align-items-center pb-3'>
                                     <i className="bi bi-archive me-2 text-secondary"></i>
@@ -947,10 +968,11 @@ export default function CommitmentPage() {
                                     rowKey="commitment_id"
                                     pagination={false}
                                     size="small"
+                                    scroll={{ x: isMobile ? 'max-content' : undefined }}
                                 />
                             </div>
                         </div>
-                        <div className='col-6'>
+                        <div className='col-6 cancel-col commitment-no-pad-mar-x'>
                             <div className='card p-3 px-4 pb-4'>
                                 <div className='d-flex align-items-center pb-3'>
                                     <i className="bi bi-pause-circle me-2 text-info"></i>
@@ -962,6 +984,7 @@ export default function CommitmentPage() {
                                     rowKey="commitment_id"
                                     pagination={false}
                                     size="small"
+                                    scroll={{ x: isMobile ? 'max-content' : undefined }}
                                 />
                             </div>
                         </div>

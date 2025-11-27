@@ -24,6 +24,7 @@ export default function DebtsTracker() {
     const [isLoading, setIsLoading] = useState(false)
     const [pendingFilter, setPendingFilter] = useState<string>('all')
     const [settledFilter, setSettledFilter] = useState<string>('all')
+    const [isMobile, setIsMobile] = useState(false)
 
     // Fetch pending debts
     const fetchPendingDebts = async () => {
@@ -53,6 +54,18 @@ export default function DebtsTracker() {
     useEffect(() => {
         fetchPendingDebts();
         fetchSettledDebts();
+    }, []);
+
+    // Detect mobile for responsive column widths
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     // Calculate totals
@@ -409,6 +422,7 @@ export default function DebtsTracker() {
             title: 'Notes',
             dataIndex: 'notes',
             key: 'notes',
+            width: isMobile ? 200 : undefined,
             render: (notes) => notes || '-'
         },
         {
@@ -480,6 +494,7 @@ export default function DebtsTracker() {
             title: 'Notes',
             dataIndex: 'notes',
             key: 'notes',
+            width: isMobile ? 200 : undefined,
             render: (notes) => notes || '-'
         },
         {
@@ -512,12 +527,12 @@ export default function DebtsTracker() {
         <div>
             <div className="d-flex align-items-center justify-content-between mb-3">
                 <div className='d-flex align-items-center'>
-                    <i className='bi bi-person-check fs-3 text-secondary me-2'></i>
+                    <i className='bi bi-person-check fs-3 text-secondary me-2  bi-title'></i>
                     <h3 className='text-secondary p-0 m-0'><strong>Debts Tracker</strong></h3>
                 </div>
                 <button className="btn btn-outline-secondary d-flex align-items-center" onClick={addDebt}>
                     <i className="bi bi-plus-circle me-2"></i>
-                    <span>Add Debt</span>
+                    <span className='span-button'>Add Debt</span>
                 </button>
             </div>
 
@@ -525,8 +540,8 @@ export default function DebtsTracker() {
 
             {/* Summary Cards */}
             <div className='row mb-3'>
-                <div className='col-6'>
-                    <div className='card bg-danger text-white'>
+                <div className='col-6 cancel-left-pad-mar'>
+                    <div className='card bg-danger text-white debt-summary-cards'>
                         <div className='card-body'>
                             <div className='d-flex justify-content-between align-items-center'>
                                 <div>
@@ -539,8 +554,8 @@ export default function DebtsTracker() {
                         </div>
                     </div>
                 </div>
-                <div className='col-6'>
-                    <div className='card bg-success text-white'>
+                <div className='col-6 cancel-right-pad-mar'>
+                    <div className='card bg-success text-white debt-summary-cards'>
                         <div className='card-body'>
                             <div className='d-flex justify-content-between align-items-center'>
                                 <div>
@@ -581,6 +596,7 @@ export default function DebtsTracker() {
                             loading={isLoading}
                             rowKey="debt_id"
                             pagination={{ pageSize: 10 }}
+                            scroll={{ x: isMobile ? 'max-content' : undefined }}
                         />
                     </div>
                 </div>
@@ -611,6 +627,7 @@ export default function DebtsTracker() {
                             columns={settledColumns}
                             rowKey="debt_id"
                             pagination={{ pageSize: 10 }}
+                            scroll={{ x: isMobile ? 'max-content' : undefined }}
                         />
                     </div>
                 </div>

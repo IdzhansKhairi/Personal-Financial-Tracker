@@ -42,6 +42,14 @@ export async function POST(request: Request) {
             wishlist_status
         } = body;
 
+        // Ensure the prices are always stored with 2 decimal places
+        const roundedEstimatePrice = wishlist_estimate_price
+            ? parseFloat(Number(wishlist_estimate_price).toFixed(2))
+            : null;
+        const roundedFinalPrice = wishlist_final_price
+            ? parseFloat(Number(wishlist_final_price).toFixed(2))
+            : null;
+
         const result = await db.run(
             `INSERT INTO wishlist_table (
                 wishlist_name,
@@ -56,8 +64,8 @@ export async function POST(request: Request) {
             [
                 wishlist_name,
                 wishlist_category,
-                wishlist_estimate_price || null,
-                wishlist_final_price || null,
+                roundedEstimatePrice,
+                roundedFinalPrice,
                 wishlist_purchase_date || null,
                 wishlist_url_link || null,
                 wishlist_url_picture || null,
@@ -93,6 +101,14 @@ export async function PUT(request: Request) {
             wishlist_status
         } = body;
 
+        // Ensure the prices are always stored with 2 decimal places
+        const roundedEstimatePrice = wishlist_estimate_price
+            ? parseFloat(Number(wishlist_estimate_price).toFixed(2))
+            : null;
+        const roundedFinalPrice = wishlist_final_price
+            ? parseFloat(Number(wishlist_final_price).toFixed(2))
+            : null;
+
         await db.run(
             `UPDATE wishlist_table SET
                 wishlist_name = ?,
@@ -107,8 +123,8 @@ export async function PUT(request: Request) {
             [
                 wishlist_name,
                 wishlist_category,
-                wishlist_estimate_price || null,
-                wishlist_final_price || null,
+                roundedEstimatePrice,
+                roundedFinalPrice,
                 wishlist_purchase_date || null,
                 wishlist_url_link || null,
                 wishlist_url_picture || null,

@@ -40,6 +40,9 @@ export async function POST(request: NextRequest) {
     // Automatically determine expense usage category from expense usage
     const transaction_expense_usage_category = getExpenseUsageCategory(transaction_expense_usage);
 
+    // Ensure the transaction amount is always stored with 2 decimal places
+    const roundedAmount = parseFloat(Number(transaction_amount).toFixed(2));
+
     const db = await openDB();
     const result = await db.run(
       `INSERT INTO transaction_list_table (
@@ -59,7 +62,7 @@ export async function POST(request: NextRequest) {
         transaction_date,
         transaction_time,
         transaction_description,
-        transaction_amount,
+        roundedAmount,
         transaction_category,
         transaction_sub_category,
         transaction_card_choice || null,

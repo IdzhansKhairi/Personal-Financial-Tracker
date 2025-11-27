@@ -43,6 +43,7 @@ export default function FinancialRecordPage() {
 
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
 
     // Filter states
     const [dateRange, setDateRange] = useState<string>('all'); // all, today, week, month, custom
@@ -72,6 +73,18 @@ export default function FinancialRecordPage() {
     // Fetch accounts on component mount
     useEffect(() => {
         fetchAccounts();
+    }, []);
+
+    // Detect mobile for responsive column widths
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     // Fetch accounts from database
@@ -345,6 +358,7 @@ export default function FinancialRecordPage() {
             title: 'Date',
             dataIndex: 'transaction_date',
             key: 'transaction_date',
+            width: isMobile ? 100 : undefined,
             sorter: (a: Transaction, b: Transaction) => a.transaction_date.localeCompare(b.transaction_date),
             render: (value: string) => formatDate(value),
         },
@@ -352,12 +366,14 @@ export default function FinancialRecordPage() {
             title: 'Time',
             dataIndex: 'transaction_time',
             key: 'transaction_time',
+            width: isMobile ? 100 : undefined,
             render: (value: string) => formatTime(value),
         },
         {
             title: 'Description',
             dataIndex: 'transaction_description',
             key: 'transaction_description',
+            width: isMobile ? 200 : undefined,
         },
         {
             title: 'Amount',
@@ -429,14 +445,14 @@ export default function FinancialRecordPage() {
 
     return (
         <div>
-            <div className='d-flex align-items-center justify-content-between mb-3'>
+            <div className='d-flex align-items-center justify-content-between mb-3 mx-sm-0 mx-2'>
                 <div className='d-flex align-items-center'>
-                    <i className='bi bi-table fs-3 text-secondary me-2'></i>
+                    <i className='bi bi-table fs-3 text-secondary me-2 bi-title'></i>
                     <h3 className='text-secondary p-0 m-0'>Transaction Records</h3>
                 </div>
-                <Link href="/dashboard/add-transaction" className='btn btn-outline-secondary d-flex align-items-center'>
+                <Link href="/dashboard/add-transaction" className='btn btn-outline-secondary d-flex align-items-center justify-content-center'>
                     <i className="bi bi-cash-stack me-2"></i>
-                    <span>Add Transaction</span>
+                    <span className='span-button'>Add Transaction</span>
                 </Link>
             </div>
 
@@ -527,7 +543,7 @@ export default function FinancialRecordPage() {
 
             {/* Enhanced Statistics Cards */}
             <div className='row mb-4'>
-                <div className='col-md-3'>
+                <div className='col-md-4'>
                     <div className='card bg-success text-white'>
                         <div className='card-body py-3'>
                             <div className='d-flex justify-content-between align-items-center'>
@@ -540,7 +556,7 @@ export default function FinancialRecordPage() {
                         </div>
                     </div>
                 </div>
-                <div className='col-md-3'>
+                <div className='col-md-4'>
                     <div className='card bg-danger text-white'>
                         <div className='card-body py-3'>
                             <div className='d-flex justify-content-between align-items-center'>
@@ -553,7 +569,7 @@ export default function FinancialRecordPage() {
                         </div>
                     </div>
                 </div>
-                <div className='col-md-3'>
+                {/* <div className='col-md-3'>
                     <div className={`card ${getFilteredStats().net >= 0 ? 'bg-primary' : 'bg-warning'} text-white`}>
                         <div className='card-body py-3'>
                             <div className='d-flex justify-content-between align-items-center'>
@@ -567,8 +583,8 @@ export default function FinancialRecordPage() {
                             </div>
                         </div>
                     </div>
-                </div>
-                <div className='col-md-3'>
+                </div> */}
+                <div className='col-md-4'>
                     <div className='card bg-secondary text-white'>
                         <div className='card-body py-3'>
                             <div className='d-flex justify-content-between align-items-center'>
@@ -589,9 +605,9 @@ export default function FinancialRecordPage() {
                         <h5 className='fw-bold text-success p-0 m-0 me-2'>TOTAL: </h5>
                         <h5 className='p-0 m-0 text-success'>MYR {getGrandTotal().toFixed(2)}</h5>
                     </div>
-                </div>  
-                <div className="row d-flex justift-content-between">
-                    <div className="col-4">
+                </div>
+                <div className="row d-flex justift-content-between transaction-charts-row mb-4">
+                    <div className="col-12 col-md-6 col-lg-4 mb-3 mb-lg-0">
                         <div className="card" style={{background: 'blue'}}>
                             <div className="card-body">
                                 <div className="row">
@@ -606,11 +622,11 @@ export default function FinancialRecordPage() {
                                 <div className='d-flex justify-content-center' style={{height: '300px'}}>
                                     <Pie className={'d-flex justify-content-center'} {...ewalletPie} />
                                 </div>
-                                
+
                             </div>
                         </div>
                     </div>
-                    <div className="col-4">
+                    <div className="col-12 col-md-6 col-lg-4 mb-3 mb-lg-0">
                         <div className="card bg-success">
                             <div className="card-body">
                                 <div className="row">
@@ -625,11 +641,11 @@ export default function FinancialRecordPage() {
                                 <div className='d-flex justify-content-center' style={{height: '300px'}}>
                                     <Pie className={'d-flex justify-content-center'} {...cashPie} />
                                 </div>
-                                
+
                             </div>
                         </div>
                     </div>
-                    <div className="col-4">
+                    <div className="col-12 col-md-6 col-lg-4">
                         <div className="card bg-danger">
                             <div className="card-body">
                                 <div className="row">
@@ -646,20 +662,24 @@ export default function FinancialRecordPage() {
                                         <Pie className={'d-flex justify-content-center'} {...cardPie} />
                                     </div>
                                 </div>
-                                
+
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className='row mb-4'>
-                <Table
-                    dataSource={dataSource}
-                    columns={columns}
-                    loading={isLoading}
-                    pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Total ${total} transactions` }}
-                />
+            <div className='row mb-4 transaction-table-wrapper'>
+                <div className='card p-2'>
+                    <Table
+                        dataSource={dataSource}
+                        columns={columns}
+                        loading={isLoading}
+                        pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Total ${total} transactions` }}
+                        scroll={{ x: isMobile ? 'max-content' : undefined }}
+                    />
+                </div>
+                
             </div>
         </div>
     )

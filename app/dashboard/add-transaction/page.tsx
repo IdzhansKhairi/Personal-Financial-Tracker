@@ -102,12 +102,12 @@ export default function AddTransactionPage() {
     };
     const displayValue = amount ? (parseInt(amount) / 100).toFixed(2) : "";
 
-    const past = Number((Number(displayValue) * 0.3).toFixed(2));
-    const present = Number((Number(displayValue) * 0.4).toFixed(2));
-    const savings = Number((Number(displayValue) * 0.2).toFixed(2));
-    const bliss = Number((Number(displayValue) * 0.1).toFixed(2));
+    const past = parseFloat((Number(displayValue) * 0.3).toFixed(2));
+    const present = parseFloat((Number(displayValue) * 0.4).toFixed(2));
+    const savings = parseFloat((Number(displayValue) * 0.2).toFixed(2));
+    const bliss = parseFloat((Number(displayValue) * 0.1).toFixed(2));
 
-    const grandTotal = Number((past + present + savings + bliss).toFixed(2));
+    const grandTotal = parseFloat((past + present + savings + bliss).toFixed(2));
     
     // Fetch accounts from database
     const fetchAccounts = async () => {
@@ -469,12 +469,13 @@ export default function AddTransactionPage() {
                                acc.account_card_type === (cardChoice || 'RHB')
                     );
                     if (account) {
+                        const newBalance = parseFloat((account.current_balance + division.amount).toFixed(2));
                         await fetch('/api/accounts', {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 account_id: account.account_id,
-                                current_balance: account.current_balance + division.amount
+                                current_balance: newBalance
                             })
                         });
                     }
@@ -515,9 +516,10 @@ export default function AddTransactionPage() {
                 }
 
                 if (account) {
-                    const newBalance = transactionType === 'income'
+                    const calculatedBalance = transactionType === 'income'
                         ? account.current_balance + transactionAmount
                         : account.current_balance - transactionAmount;
+                    const newBalance = parseFloat(calculatedBalance.toFixed(2));
 
                     await fetch('/api/accounts', {
                         method: 'PUT',
@@ -554,8 +556,8 @@ export default function AddTransactionPage() {
 
     return (
         <div>
-            <div className='d-flex align-items-center'>
-                <i className='bi bi-currency-dollar fs-3 text-secondary me-2'></i>
+            <div className='d-flex align-items-center title-pages '>
+                <i className='bi bi-currency-dollar fs-3 text-secondary me-2 bi-title'></i>
                 <h3 className='text-secondary m-0 p-0'>Add Transactions (Income/Expense)</h3>
             </div>
 
@@ -566,23 +568,37 @@ export default function AddTransactionPage() {
                 <div className='col-12'>
                     <div className='card bg-light'>
                         <div className='card-body py-2'>
-                            <div className='row text-center'>
-                                <div className='col-3'>
+                            <div className='row text-center mb-2'>
+                                <div className='col-4 d-flex align-items-center justify-content-center'>
                                     <small className='text-muted'>Today's Income</small>
-                                    <h5 className='mb-0 text-success fw-bold'>+MYR {getTodayStats().income.toFixed(2)}</h5>
                                 </div>
-                                <div className='col-3'>
+                                <div className='col-4  d-flex align-items-center justify-content-center'>
                                     <small className='text-muted'>Today's Expenses</small>
-                                    <h5 className='mb-0 text-danger fw-bold'>-MYR {getTodayStats().expenses.toFixed(2)}</h5>
                                 </div>
-                                <div className='col-3'>
+                                {/* <div className='col-3'>
                                     <small className='text-muted'>Net Balance</small>
                                     <h5 className={`mb-0 fw-bold ${getTodayStats().net >= 0 ? 'text-primary' : 'text-warning'}`}>
                                         {getTodayStats().net >= 0 ? '+' : ''}MYR {getTodayStats().net.toFixed(2)}
                                     </h5>
-                                </div>
-                                <div className='col-3'>
+                                </div> */}
+                                <div className='col-4  d-flex align-items-center justify-content-center'>
                                     <small className='text-muted'>Transactions</small>
+                                </div>
+                            </div>
+                            <div className='row text-center'>
+                                <div className='col-4 d-flex align-items-center justify-content-center'>
+                                    <h5 className='mb-0 text-success fw-bold'>+MYR {getTodayStats().income.toFixed(2)}</h5>
+                                </div>
+                                <div className='col-4 d-flex align-items-center justify-content-center'>
+                                    <h5 className='mb-0 text-danger fw-bold'>-MYR {getTodayStats().expenses.toFixed(2)}</h5>
+                                </div>
+                                {/* <div className='col-3'>
+                                    <small className='text-muted'>Net Balance</small>
+                                    <h5 className={`mb-0 fw-bold ${getTodayStats().net >= 0 ? 'text-primary' : 'text-warning'}`}>
+                                        {getTodayStats().net >= 0 ? '+' : ''}MYR {getTodayStats().net.toFixed(2)}
+                                    </h5>
+                                </div> */}
+                                <div className='col-4 d-flex align-items-center justify-content-center'>
                                     <h5 className='mb-0 text-secondary fw-bold'>{getTodayStats().count}</h5>
                                 </div>
                             </div>
@@ -592,11 +608,11 @@ export default function AddTransactionPage() {
             </div>
 
             {/* Summary Cards */}
-            <div className='row mb-4'>
-                <div className='col-6'>
-                    <div className='card bg-danger text-white'>
-                        <div className='card-body'>
-                            <div className='d-flex justify-content-between align-items-center'>
+            <div className='row mb-4 debt-commitment-cards'>
+                <div className='col-12 col-md-6 mb-3 mb-md-0'>
+                    <div className='card bg-danger text-white h-100'>
+                        <div className='card-body d-flex flex-column'>
+                            <div className='d-flex justify-content-between align-items-center flex-grow-1'>
                                 <div>
                                     <h6 className='mb-1'>Total Debt (Payables)</h6>
                                     <h3 className='mb-0'>MYR {getTotalPayables().toFixed(2)}</h3>
@@ -605,7 +621,7 @@ export default function AddTransactionPage() {
                                 <i className="bi bi-exclamation-triangle" style={{ fontSize: '3rem', opacity: 0.3 }}></i>
                             </div>
                             <div className='mt-3'>
-                                <Link href="/dashboard/debts-tracker" className='btn btn-sm btn-light'>
+                                <Link href="/dashboard/debts-tracker" className='d-flex align-items-center justify-content-center btn btn-sm btn-light w-100'>
                                     <i className="bi bi-arrow-right-circle me-2"></i>
                                     View Debts
                                 </Link>
@@ -613,10 +629,10 @@ export default function AddTransactionPage() {
                         </div>
                     </div>
                 </div>
-                <div className='col-6'>
-                    <div className='card bg-warning text-dark'>
-                        <div className='card-body'>
-                            <div className='d-flex justify-content-between align-items-center'>
+                <div className='col-12 col-md-6'>
+                    <div className='card bg-warning text-dark h-100'>
+                        <div className='card-body d-flex flex-column'>
+                            <div className='d-flex justify-content-between align-items-center flex-grow-1'>
                                 <div>
                                     <h6 className='mb-1'>Unpaid Commitments</h6>
                                     <h3 className='mb-0'>{getUnpaidCommitmentsCount()} items</h3>
@@ -625,7 +641,7 @@ export default function AddTransactionPage() {
                                 <i className="bi bi-calendar-x" style={{ fontSize: '3rem', opacity: 0.3 }}></i>
                             </div>
                             <div className='mt-3'>
-                                <Link href="/dashboard/commitment" className='btn btn-sm btn-dark'>
+                                <Link href="/dashboard/commitment" className='d-flex align-items-center justify-content-center btn btn-sm btn-dark w-100'>
                                     <i className="bi bi-arrow-right-circle me-2"></i>
                                     View Commitments
                                 </Link>
@@ -635,13 +651,13 @@ export default function AddTransactionPage() {
                 </div>
             </div>
 
-            <div className='row'>
-                <div className='col-8'>
+            <div className='row transaction-form-container'>
+                <div className='col-12 col-lg-8 mb-4 mb-lg-0 cancel-col'>
                     <div className='card mb-4'>
-                        <div className='card-header d-flex align-items-center justify-content-between'>
+                        <div className='cancel-dflex card-header d-flex align-items-center justify-content-between'>
                             <h5 className='m-0 p-0 py-2'>Add {transactionType === 'income' ? 'Incomes' : 'Expenses'}</h5>
 
-                            <div className="btn-group" role="group">
+                            <div className="btn-group cancel-col" role="group">
                                 <button type="button" className={`btn ${transactionType === 'income' ? 'btn-success' : 'btn-outline-secondary'}`} onClick={() => setType('income')}>
                                     Income
                                 </button>
@@ -652,18 +668,18 @@ export default function AddTransactionPage() {
                         </div>
                         <div className='card-body'>
                             <div className='row mb-4'>
-                                <div className='col-6 d-flex align-items-center'>
+                                <div className='col-6 d-flex align-items-center cancel-dflex'>
                                     <span className='form-label m-0 p-0 me-2'>Date</span>
                                     <input type='date' className='form-control' value={todayDate} disabled></input>
                                 </div>
 
-                                <div className='col-6 d-flex align-items-center'>
+                                <div className='col-6 d-flex align-items-center cancel-dflex'>
                                     <label className='form-label m-0 p-0 me-2'>Time</label>
                                     <input type='time' className='form-control' value={currentTime} disabled></input>
                                 </div>
                             </div>
                             <div className='row mb-5'>
-                                <div className='col d-flex align-items-center'>
+                                <div className='col d-flex align-items-center cancel-dflex'>
                                     <label className='form-label me-2'>Description</label>
                                     <textarea className='form-control' placeholder={transactionType === 'income' ? 'Enter incomes description...' : 'Enter expenses description...'} value={description} onChange={(e) => setDescription(e.target.value)}></textarea>
                                 </div>
@@ -673,22 +689,24 @@ export default function AddTransactionPage() {
 
                             {transactionType === 'income' && (
                                 <div className='row mb-5'>
-                                    <div className='d-flex align-items-center mb-4'>
-                                        <div className='col-2'>
+                                    <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                        <div className='col-4 col-sm-3 col-md-2 cancel-col'>
                                             <label className=''>Amount</label>
                                         </div>
-                                        <div className='col-10'>
-                                            <div className='input-group'>
+
+                                        <div className='col-8 col-sm-9 col-md-10 cancel-col'>
+                                            <div className='input-group flex-nowrap' role='group'>
                                                 <span className='input-group-text'>MYR</span>
                                                 <input className='form-control' type='number' step="0.01" value={displayValue} placeholder='Enter amount' onChange={handleChange}></input>
                                             </div>
                                         </div>
+                                        
                                     </div>
-                                    <div className='d-flex align-items-center mb-4'>
-                                        <div className='col-2'>
+                                    <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                        <div className='col-4 col-sm-3 col-md-2'>
                                             <label className='form-label p-0 m-0 me-2'>Category</label>
                                         </div>
-                                        <div className='col-10'>
+                                        <div className='col-8 col-sm-9 col-md-10 cancel-col'>
                                             <select className='form-select' value={accountCategory} onChange={(e) => setAccountCategory(e.target.value)}>
                                                 <option value="" disabled hidden>Select category</option>
                                                 <option value="e_wallet">E-Wallet</option>
@@ -700,11 +718,11 @@ export default function AddTransactionPage() {
 
                                     {accountCategory === 'card' && (
                                         <div>
-                                            <div className='d-flex align-items-center mb-4'>
-                                                <div className='col-2'>
+                                            <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                                <div className='col-4 col-sm-3 col-md-2'>
                                                     <label className='form-label p-0 m-0 me-2'>Card</label>
                                                 </div>
-                                                <div className='col-10'>
+                                                <div className='col-8 col-sm-9 col-md-10 cancel-col'>
                                                     <select className='form-select' value={cardChoice} onChange={(e) => setCardChoice(e.target.value)}>
                                                         <option value="" disabled hidden>Select card</option>
                                                         <option value="RHB">RHB</option>
@@ -718,11 +736,11 @@ export default function AddTransactionPage() {
 
                                     )}
                                     
-                                    <div className='d-flex align-items-center mb-4'>
-                                        <div className='col-2'>
+                                    <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                        <div className='col-4 col-sm-3 col-md-2'>
                                             <label className='form-label p-0 m-0 me-2'>Sub-category</label>
                                         </div>
-                                        <div className='col-10'>
+                                        <div className='col-8 col-sm-9 col-md-10 cancel-col'>
                                             <select className='form-select' value={accountSubCategory} onChange={(e) => setAccountSubCategory(e.target.value)} disabled={!accountCategory}>
                                                 <option value="" disabled hidden>Select sub-category</option>
                                                 {subCategories[accountCategory as "e_wallet" | "cash" | "card"]?.map(item => (
@@ -739,9 +757,9 @@ export default function AddTransactionPage() {
                                     </div>
 
                                     {accountSubCategory === 'moneyDivision' && (
-                                        <div className='d-flex align-items-center mb-4'>
-                                            <div className='col-2'></div>
-                                            <div className='col-10'>
+                                        <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                            <div className='col-4 col-sm-3 col-md-2'></div>
+                                            <div className='col-8 col-sm-9 col-md-10  cancel-col'>
                                                 <div className='d-flex align-items-center my-4'>
                                                     <Table 
                                                         className='w-100 border rounded'
@@ -805,11 +823,11 @@ export default function AddTransactionPage() {
                                         </div>
                                     )}
 
-                                    <div className='d-flex align-items-center mb-4'>
-                                        <div className='col-2'>
+                                    <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                        <div className='col-4 col-sm-3 col-md-2'>
                                             <label className='form-label p-0 m-0 me-2'>Source</label>
                                         </div>
-                                        <div className='col-10'>
+                                        <div className='col-8 col-sm-9 col-md-10 cancel-col'>
                                             <select className='form-select' value={incomeSource} onChange={(e) => setIncomeSource(e.target.value)} disabled={!accountCategory}>
                                                 <option value="" disabled hidden>Select source</option>
                                                 <option value="salary">Salary</option>
@@ -822,6 +840,7 @@ export default function AddTransactionPage() {
                                                 <option value="refund">Refund</option>
                                                 <option value="tally">Tally</option>
                                                 <option value="update">Update</option>
+                                                <option value="move_money">Move Money</option>
                                                 <option value="others">Others</option>
                                             </select>
 
@@ -832,22 +851,22 @@ export default function AddTransactionPage() {
 
                             {transactionType === 'expense' && (
                                 <div className='row mb-5'>
-                                    <div className='d-flex align-items-center mb-4'>
-                                        <div className='col-2'>
+                                    <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                        <div className='col-4 col-sm-3 col-md-2 cancel-col'>
                                             <label className=''>Amount</label>
                                         </div>
-                                        <div className='col-10'>
-                                            <div className='input-group'>
+                                        <div className='col-8 col-sm-9 col-md-10 cancel-col'>
+                                            <div className='input-group flex-nowrap'>
                                                 <span className='input-group-text'>MYR</span>
                                                 <input className='form-control' type='number' step="0.01" value={displayValue} placeholder='Enter amount' onChange={handleChange}></input>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className='d-flex align-items-center mb-4'>
-                                        <div className='col-2'>
+                                    <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                        <div className='col-4 col-sm-3 col-md-2'>
                                             <label className='form-label p-0 m-0 me-2'>Category</label>
                                         </div>
-                                        <div className='col-10'>
+                                        <div className='col-8 col-sm-9 col-md-10 cancel-col'>
                                             <select className='form-select' value={accountCategory} onChange={(e) => setAccountCategory(e.target.value)}>
                                                 <option value="" disabled hidden>Select category</option>
                                                 <option value="e_wallet">E-Wallet</option>
@@ -857,11 +876,11 @@ export default function AddTransactionPage() {
                                         </div>
                                     </div>
                                     {accountCategory === 'card' && (
-                                        <div className='d-flex align-items-center mb-4'>
-                                            <div className='col-2'>
+                                        <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                            <div className='col-4 col-sm-3 col-md-2'>
                                                 <label className='form-label p-0 m-0 me-2'>Card</label>
                                             </div>
-                                            <div className='col-10'>
+                                            <div className='col-8 col-sm-9 col-md-10 cancel-col'>
                                                 <select className='form-select' value={cardChoice} onChange={(e) => setCardChoice(e.target.value)}>
                                                     <option value="" disabled hidden>Select card</option>
                                                     <option value="RHB">RHB</option>
@@ -869,11 +888,11 @@ export default function AddTransactionPage() {
                                             </div>
                                         </div>
                                     )}
-                                    <div className='d-flex align-items-center mb-4'>
-                                        <div className='col-2'>
+                                    <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                        <div className='col-4 col-sm-3 col-md-2'>
                                             <label className='form-label p-0 m-0 me-2'>Sub-category</label>
                                         </div>
-                                        <div className='col-10'>
+                                        <div className='col-8 col-sm-9 col-md-10 cancel-col'>
                                             <select className='form-select' value={accountSubCategory} onChange={(e) => setAccountSubCategory(e.target.value)} disabled={!accountCategory}>
                                                 <option value="" disabled hidden>Select sub-category</option>
                                                 {subCategories[accountCategory as "e_wallet" | "cash" | "card"]?.map(item => (
@@ -884,11 +903,11 @@ export default function AddTransactionPage() {
                                             </select>
                                         </div>
                                     </div>
-                                    <div className='d-flex align-items-center mb-4'>
-                                        <div className='col-2'>
+                                    <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                        <div className='col-4 col-sm-3 col-md-2'>
                                             <label className='form-label p-0 m-0 me-2'>Usage</label>
                                         </div>
-                                        <div className='col-10'>
+                                        <div className='col-8 col-sm-9 col-md-10 cancel-col'>
                                             <select className='form-select' value={expenseUsage} onChange={(e) => setExpenseUsage(e.target.value)} disabled={!accountCategory}>
                                                 
                                                 <option value="" disabled hidden>Select expense usage</option>
@@ -934,11 +953,11 @@ export default function AddTransactionPage() {
                                         </div>
                                     </div>
                                     {expenseUsage === 'hobby' && (
-                                        <div className='d-flex align-items-center mb-4'>
-                                            <div className='col-2'>
+                                        <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                            <div className='col-4 col-sm-3 col-md-2 cancel-col'>
                                                 <label className='form-label p-0 m-0 me-2'>Hobby Category</label>
                                             </div>
-                                            <div className='col-10'>
+                                            <div className='col-8 col-sm-9 col-md-10 cancel-col'>
                                                 <select className='form-select' value={hobbyCategory} onChange={(e) => setHobbyCategory(e.target.value)} disabled={!accountCategory}>
                                                     <option value="">Select Hobby Category</option>
                                                     <option value="gunpla">Gunpla</option>
@@ -963,81 +982,84 @@ export default function AddTransactionPage() {
                 </div>
 
 
-                <div className='col-4'>
-                    <div className="card bg-secondary py-3 px-1">
+                <div className='col-4 cancel-col'>
+                    <div className="card bg-secondary py-3">
 
                         <div className='row mb-3 px-4'>
                             <div className='d-flex align-items-center justify-content-between'>
                                 <label className='fw-bold text-white'>Remainder</label>
                                 <div className='d-flex align-items-center'>
-                                    <label className='fw-bold' style={{ color: '#90EE90' }}>TOTAL: MYR {getGrandTotal().toFixed(2)}</label>
+                                    <label className='fw-bold' style={{ color: '#90EE90' }}>MYR {getGrandTotal().toFixed(2)}</label>
                                 </div>
                             </div>
                         </div>
 
-                        <Carousel arrows dots={false} className='px-4'>
-                            <div className='mb-3'>
-                                <div className="card mb-3">
-                                    <div className='card-header'>
-                                        <div className="d-flex align-items-center justify-content-between">
-                                            <div>
-                                                <CreditCardOutlined className='me-2' />
-                                                <label className="large fw-bold">CARD (RHB)</label>
+                        <div className='row'>
+                            <Carousel arrows dots={false} className='px-4 d-flex align-items-center justify-content-center'>
+                                <div className='mb-3'>
+                                    <div className="card mb-3">
+                                        <div className='card-header'>
+                                            <div className="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <CreditCardOutlined className='me-2' />
+                                                    <label className="large fw-bold">CARD (RHB)</label>
+                                                </div>
+                                                
+                                                <label className="fw-bold text-success">MYR {getTotalByCategory('Card').toFixed(2)}</label>
                                             </div>
-                                            
-                                            <label className="fw-bold text-success">MYR {getTotalByCategory('Card').toFixed(2)}</label>
                                         </div>
-                                    </div>
-                                    <div className="card-body">
-                                        <div className='d-flex align-items-center justify-content-center' style={{height: '300px'}}>
-                                            <Pie className={'d-flex justify-content-center'} {...cardPie} />
+                                        <div className="card-body">
+                                            <div className='d-flex align-items-center justify-content-center add-transaction-pie' style={{height: '300px'}}>
+                                                <Pie className={'d-flex justify-content-center'} {...cardPie} />
+                                            </div>
                                         </div>
-
                                     </div>
                                 </div>
-                            </div>
-                            <div className='mb-3'>
-                                <div className="card mb-3">
-                                    <div className='card-header'>
-                                        <div className="d-flex align-items-center justify-content-between">
-                                            <div>
-                                                <i className="bi bi-cash me-2"></i>
-                                                <label className="large fw-bold">CASH</label>
+                                <div className='mb-3'>
+                                    <div className="card mb-3">
+                                        <div className='card-header'>
+                                            <div className="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <i className="bi bi-cash me-2"></i>
+                                                    <label className="large fw-bold">CASH</label>
+                                                </div>
+                                                
+                                                <label className="fw-bold text-success">MYR {getTotalByCategory('Cash').toFixed(2)}</label>
                                             </div>
-                                            
-                                            <label className="fw-bold text-success">MYR {getTotalByCategory('Cash').toFixed(2)}</label>
                                         </div>
-                                    </div>
-                                    <div className="card-body">
-                                        <div className='d-flex align-items-center justify-content-center' style={{height: '300px'}}>
-                                            <Pie className={'d-flex justify-content-center'} {...cashPie} />
-                                        </div>
+                                        <div className="card-body">
+                                            <div className='d-flex align-items-center justify-content-center add-transaction-pie' style={{height: '300px'}}>
+                                                <Pie className={'d-flex justify-content-center'} {...cashPie} />
+                                            </div>
 
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className='mb-3'>
-                                <div className="card mb-3">
-                                    <div className='card-header'>
-                                        <div className="d-flex align-items-center justify-content-between">
-                                            <div>
-                                                <i className="bi bi-wallet me-2"></i>
-                                                <label className="large fw-bold">E-Wallet</label>
+                                <div className='mb-3'>
+                                    <div className="card mb-3">
+                                        <div className='card-header'>
+                                            <div className="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <i className="bi bi-wallet me-2"></i>
+                                                    <label className="large fw-bold">E-Wallet</label>
+                                                </div>
+                                                
+                                                <label className="fw-bold text-success">MYR {getTotalByCategory('E-Wallet').toFixed(2)}</label>
                                             </div>
-                                            
-                                            <label className="fw-bold text-success">MYR {getTotalByCategory('E-Wallet').toFixed(2)}</label>
                                         </div>
-                                    </div>
-                                    <div className="card-body">
-                                        <div className='d-flex align-items-center justify-content-center' style={{height: '300px'}}>
-                                            <Pie className={'d-flex justify-content-center'} {...ewalletPie} />
-                                        </div>
+                                        <div className="card-body">
+                                            <div className='d-flex align-items-center justify-content-center add-transaction-pie' style={{height: '300px'}}>
+                                                <Pie className={'d-flex justify-content-center'} {...ewalletPie} />
+                                            </div>
 
+                                        </div>
                                     </div>
+                                    
                                 </div>
-                                
-                            </div>
-                        </Carousel>
+                            </Carousel>
+                        </div>
+                        
+                        
 
                     </div>
                 </div>
@@ -1054,13 +1076,13 @@ export default function AddTransactionPage() {
                             </div>
                             <div className='d-flex align-items-center gap-2'>
                                 <button
-                                    className='btn btn-sm btn-outline-secondary'
+                                    className='btn btn-sm btn-outline-secondary d-flex align-items-center'
                                     onClick={() => setShowRecentTransactions(!showRecentTransactions)}
                                 >
                                     <i className={`bi bi-chevron-${showRecentTransactions ? 'up' : 'down'}`}></i>
                                 </button>
-                                <Link href="/dashboard/transaction-record" className='btn btn-sm btn-primary'>
-                                    <i className="bi bi-list-ul me-1"></i>
+                                <Link href="/dashboard/transaction-record" className='btn btn-sm btn-primary d-flex align-items-center'>
+                                    <i className="bi bi-list-ul"></i>
                                     View All
                                 </Link>
                             </div>
@@ -1077,18 +1099,18 @@ export default function AddTransactionPage() {
                                         {recentTransactions.map((transaction) => (
                                             <div key={transaction.transaction_id} className='list-group-item px-0'>
                                                 <div className='d-flex justify-content-between align-items-center'>
-                                                    <div className='d-flex align-items-center gap-3'>
+                                                    <div className='col-8 d-flex align-items-center gap-3'>
                                                         <div className={`p-2 rounded ${transaction.transaction_income_source ? 'bg-success' : 'bg-danger'} bg-opacity-10`}>
                                                             <i className={`bi ${transaction.transaction_income_source ? 'bi-arrow-down-circle text-success' : 'bi-arrow-up-circle text-danger'} fs-4`}></i>
                                                         </div>
-                                                        <div>
+                                                        <div className='col-8'>
                                                             <h6 className='mb-0'>{transaction.transaction_description}</h6>
                                                             <small className='text-muted'>
                                                                 {formatTime(transaction.transaction_time)} • {transaction.transaction_category} ({transaction.transaction_sub_category})
                                                             </small>
                                                         </div>
                                                     </div>
-                                                    <div className='text-end'>
+                                                    <div className='col-4 text-end'>
                                                         <h5 className={`mb-0 fw-bold ${transaction.transaction_income_source ? 'text-success' : 'text-danger'}`}>
                                                             {transaction.transaction_income_source ? '+' : '-'}MYR {transaction.transaction_amount.toFixed(2)}
                                                         </h5>
