@@ -1,30 +1,19 @@
 import { NextResponse } from "next/server";
-import { openDB } from "@/lib/db";
+import { DebtsAdapter } from "@/lib/db-adapter";
 
 // GET - Fetch all debts or filter by status and type
 export async function GET(request: Request) {
     try {
-        const db = await openDB();
         const { searchParams } = new URL(request.url);
         const status = searchParams.get('status');
-        const debt_type = searchParams.get('type');
+        const type = searchParams.get('type');
 
-        let query = 'SELECT * FROM debts_table WHERE 1=1';
-        const params: any[] = [];
+        const filters: any = {};
+        if (status) filters.status = status;
+        if (type) filters.type = type;
 
-        if (status) {
-            query += ' AND status = ?';
-            params.push(status);
-        }
-
-        if (debt_type) {
-            query += ' AND debt_type = ?';
-            params.push(debt_type);
-        }
-
-        query += ' ORDER BY created_date DESC';
-
-        const debts = await db.all(query, params);
+        // Use DebtsAdapter to support dual database strategy
+        const debts = await DebtsAdapter.getAll(filters);
 
         return NextResponse.json(debts);
     } catch (error) {
@@ -36,9 +25,7 @@ export async function GET(request: Request) {
 // POST - Create a new debt
 export async function POST(request: Request) {
     try {
-        const db = await openDB();
         const body = await request.json();
-
         const {
             debt_type,
             created_date,
@@ -46,37 +33,26 @@ export async function POST(request: Request) {
             person_name,
             amount,
             notes,
-            status
+            status,
+            settled_date
         } = body;
 
-        // Ensure the amount is always stored with 2 decimal places
+        // Round amount to 2 decimal places
         const roundedAmount = parseFloat(Number(amount).toFixed(2));
 
-        const result = await db.run(
-            `INSERT INTO debts_table (
-                debt_type,
-                created_date,
-                due_date,
-                person_name,
-                amount,
-                notes,
-                status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [
-                debt_type,
-                created_date,
-                due_date || null,
-                person_name,
-                roundedAmount,
-                notes || null,
-                status || 'pending'
-            ]
-        );
-
-        return NextResponse.json({
-            success: true,
-            debt_id: result.lastID
+        // Use DebtsAdapter to support dual database strategy
+        const newDebt = await DebtsAdapter.create({
+            debt_type,
+            created_date,
+            due_date: due_date || null,
+            person_name,
+            amount: roundedAmount,
+            notes: notes || null,
+            status: status || 'pending',
+            settled_date: settled_date || null
         });
+
+        return NextResponse.json({ success: true, debt_id: newDebt.debt_id });
     } catch (error) {
         console.error('Failed to create debt:', error);
         return NextResponse.json({ error: 'Failed to create debt' }, { status: 500 });
@@ -86,9 +62,7 @@ export async function POST(request: Request) {
 // PUT - Update an existing debt
 export async function PUT(request: Request) {
     try {
-        const db = await openDB();
         const body = await request.json();
-
         const {
             debt_id,
             debt_type,
@@ -101,32 +75,20 @@ export async function PUT(request: Request) {
             settled_date
         } = body;
 
-        // Ensure the amount is always stored with 2 decimal places
+        // Round amount to 2 decimal places
         const roundedAmount = parseFloat(Number(amount).toFixed(2));
 
-        await db.run(
-            `UPDATE debts_table SET
-                debt_type = ?,
-                created_date = ?,
-                due_date = ?,
-                person_name = ?,
-                amount = ?,
-                notes = ?,
-                status = ?,
-                settled_date = ?
-            WHERE debt_id = ?`,
-            [
-                debt_type,
-                created_date,
-                due_date || null,
-                person_name,
-                roundedAmount,
-                notes || null,
-                status,
-                settled_date || null,
-                debt_id
-            ]
-        );
+        // Use DebtsAdapter to support dual database strategy
+        await DebtsAdapter.update(debt_id, {
+            debt_type,
+            created_date,
+            due_date: due_date || null,
+            person_name,
+            amount: roundedAmount,
+            notes: notes || null,
+            status,
+            settled_date: settled_date || null
+        });
 
         return NextResponse.json({ success: true });
     } catch (error) {
@@ -138,7 +100,6 @@ export async function PUT(request: Request) {
 // DELETE - Delete a debt
 export async function DELETE(request: Request) {
     try {
-        const db = await openDB();
         const { searchParams } = new URL(request.url);
         const debt_id = searchParams.get('id');
 
@@ -146,7 +107,8 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: 'Debt ID required' }, { status: 400 });
         }
 
-        await db.run('DELETE FROM debts_table WHERE debt_id = ?', [debt_id]);
+        // Use DebtsAdapter to support dual database strategy
+        await DebtsAdapter.delete(parseInt(debt_id));
 
         return NextResponse.json({ success: true });
     } catch (error) {

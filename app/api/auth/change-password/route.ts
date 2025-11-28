@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, verifyPassword, hashPassword } from "@/lib/auth";
-import { openDB } from "@/lib/db";
+import { AuthAdapter } from "@/lib/db-adapter";
 
 // Change user password
 export async function POST(request: NextRequest) {
@@ -37,13 +37,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const db = await openDB();
-
-    // Get user's current password hash
-    const userWithPassword = await db.get(
-      `SELECT password_hash FROM users WHERE id = ?`,
-      [user.id]
-    );
+    // Get user's current password hash using AuthAdapter
+    const userWithPassword = await AuthAdapter.getUserById(user.id) as any;
 
     if (!userWithPassword) {
       return NextResponse.json(
@@ -68,15 +63,10 @@ export async function POST(request: NextRequest) {
     // Hash new password
     const newPasswordHash = await hashPassword(newPassword);
 
-    // Update password in database
-    await db.run(
-      `UPDATE users
-       SET password_hash = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
-      [newPasswordHash, user.id]
-    );
-
-    await db.close();
+    // Update password using AuthAdapter
+    await AuthAdapter.updateUser(user.id, {
+      password_hash: newPasswordHash,
+    });
 
     return NextResponse.json({
       success: true,

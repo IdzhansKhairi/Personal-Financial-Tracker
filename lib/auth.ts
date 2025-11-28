@@ -1,7 +1,7 @@
 // lib/auth.ts
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import { openDB } from "./db";
+import { AuthAdapter } from "./db-adapter";
 import { cookies } from "next/headers";
 
 const SALT_ROUNDS = 10;
@@ -47,85 +47,33 @@ export function generateSessionToken(): string {
 
 // Create a new session for a user (deletes all existing sessions for single-device login)
 export async function createSession(userId: number): Promise<string> {
-  const db = await openDB();
-
-  // IMPORTANT: Delete all existing sessions for this user (single session only)
-  // This ensures only one device can be logged in at a time
-  await db.run(`DELETE FROM sessions WHERE user_id = ?`, [userId]);
-
   const sessionToken = generateSessionToken();
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + SESSION_DURATION_DAYS);
 
-  await db.run(
-    `INSERT INTO sessions (user_id, session_token, expires_at) VALUES (?, ?, ?)`,
-    [userId, sessionToken, expiresAt.toISOString()]
-  );
+  // Use AuthAdapter to support dual database strategy
+  await AuthAdapter.createSession(userId, sessionToken, expiresAt.toISOString());
 
-  await db.close();
   return sessionToken;
 }
 
 // Get session by token and validate expiration
 export async function getSessionByToken(token: string): Promise<SessionWithUser | null> {
-  const db = await openDB();
-
-  const session = await db.get<SessionWithUser>(
-    `SELECT
-      s.*,
-      u.id as user_id,
-      u.username,
-      u.email,
-      u.phone_number,
-      u.first_name,
-      u.last_name,
-      u.is_active
-    FROM sessions s
-    INNER JOIN users u ON s.user_id = u.id
-    WHERE s.session_token = ? AND s.expires_at > datetime('now') AND u.is_active = 1`,
-    [token]
-  );
-
-  await db.close();
-
-  if (!session) {
-    return null;
-  }
-
-  // Restructure to match SessionWithUser interface
-  const result: SessionWithUser = {
-    id: session.id,
-    user_id: session.user_id,
-    session_token: session.session_token,
-    expires_at: session.expires_at,
-    created_at: session.created_at,
-    user: {
-      id: session.user_id,
-      username: session.username,
-      email: session.email,
-      phone_number: session.phone_number,
-      first_name: session.first_name,
-      last_name: session.last_name,
-      is_active: session.is_active,
-      created_at: session.created_at,
-    },
-  };
-
-  return result;
+  // Use AuthAdapter to support dual database strategy
+  const session = await AuthAdapter.getSessionByToken(token);
+  return session as SessionWithUser | null;
 }
 
 // Delete a session (logout)
 export async function deleteSession(token: string): Promise<void> {
-  const db = await openDB();
-  await db.run(`DELETE FROM sessions WHERE session_token = ?`, [token]);
-  await db.close();
+  // Use AuthAdapter to support dual database strategy
+  await AuthAdapter.deleteSession(token);
 }
 
 // Clean up expired sessions
 export async function cleanupExpiredSessions(): Promise<void> {
-  const db = await openDB();
-  await db.run(`DELETE FROM sessions WHERE expires_at < datetime('now')`);
-  await db.close();
+  // Use AuthAdapter to support dual database strategy
+  await AuthAdapter.cleanupExpiredSessions();
 }
 
 // Verify user credentials and return user if valid
@@ -133,14 +81,8 @@ export async function verifyUserCredentials(
   username: string,
   password: string
 ): Promise<User | null> {
-  const db = await openDB();
-
-  const user = await db.get<User & { password_hash: string }>(
-    `SELECT * FROM users WHERE username = ? AND is_active = 1`,
-    [username]
-  );
-
-  await db.close();
+  // Use AuthAdapter to support dual database strategy
+  const user = await AuthAdapter.getUserByUsername(username) as any;
 
   if (!user) {
     return null;

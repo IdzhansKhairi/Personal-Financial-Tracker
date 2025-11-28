@@ -1,14 +1,12 @@
 // app/api/accounts/route.ts
-import { openDB } from "@/lib/db";
+import { AccountsAdapter } from "@/lib/db-adapter";
 import { NextRequest, NextResponse } from "next/server";
 
 // GET - Fetch all account balances
 export async function GET() {
   try {
-    const db = await openDB();
-    const accounts = await db.all(
-      "SELECT * FROM account_balance_table ORDER BY account_category, account_sub_category, account_card_type"
-    );
+    // Use AccountsAdapter to support dual database strategy
+    const accounts = await AccountsAdapter.getAll();
     return NextResponse.json(accounts);
   } catch (error) {
     console.error("Failed to fetch accounts:", error);
@@ -35,11 +33,8 @@ export async function PUT(request: NextRequest) {
     // Ensure the balance is always stored with 2 decimal places
     const roundedBalance = parseFloat(Number(current_balance).toFixed(2));
 
-    const db = await openDB();
-    await db.run(
-      "UPDATE account_balance_table SET current_balance = ? WHERE account_id = ?",
-      [roundedBalance, account_id]
-    );
+    // Use AccountsAdapter to support dual database strategy
+    await AccountsAdapter.updateBalance(account_id, roundedBalance);
 
     return NextResponse.json({ message: "Account balance updated" });
   } catch (error) {
