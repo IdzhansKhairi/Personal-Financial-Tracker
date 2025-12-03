@@ -27,6 +27,20 @@ Personal Financial Tracker is a personal project of mine that focuses on replica
 
 ---
 
+## 🚀 Live Demo
+
+**Try the application now without installation!**
+
+🔗 **[https://personal-financial-tracker-six.vercel.app/login](https://personal-financial-tracker-six.vercel.app/login)**
+
+**Demo Credentials:**
+- **Username:** `user.demo`
+- **Password:** `finttrack-demo-92AjLk!`
+
+> Feel free to explore all features, add transactions, manage commitments, and test the full functionality. The demo account is pre-configured for immediate use.
+
+---
+
 ## Table of Contents
 
 - [About the Project](#about-the-project)
