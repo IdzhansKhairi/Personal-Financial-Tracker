@@ -403,12 +403,12 @@ export default function FinancialRecordPage() {
             dataIndex: 'transaction_sub_category',
             key: 'transaction_sub_category',
         },
-        {
-            title: 'Card Type',
-            dataIndex: 'transaction_card_choice',
-            key: 'transaction_card_choice',
-            render: (value: string | null) => value || '-',
-        },
+        // {
+        //     title: 'Card Type',
+        //     dataIndex: 'transaction_card_choice',
+        //     key: 'transaction_card_choice',
+        //     render: (value: string | null) => value || '-',
+        // },
         {
             title: 'Source / Usage',
             key: 'source_usage',

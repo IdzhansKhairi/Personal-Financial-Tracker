@@ -405,11 +405,11 @@ export default function AddTransactionPage() {
         if (!accountCategory) return false;
         if (!accountSubCategory) return false;
 
-        // Card category requires card choice
-        if (accountCategory === 'card' && !cardChoice) return false;
+        // // Card category requires card choice
+        // if (accountCategory === 'card' && !cardChoice) return false;
 
-        // Money division requires card choice
-        if (accountSubCategory === 'moneyDivision' && !cardChoice) return false;
+        // // Money division requires card choice
+        // if (accountSubCategory === 'moneyDivision' && !cardChoice) return false;
 
         // Income requires source
         if (transactionType === 'income' && !incomeSource) return false;
@@ -716,7 +716,7 @@ export default function AddTransactionPage() {
                                         </div>
                                     </div>
 
-                                    {accountCategory === 'card' && (
+                                    {/* {accountCategory === 'card' && (
                                         <div>
                                             <div className='d-flex align-items-center mb-4 cancel-dflex'>
                                                 <div className='col-4 col-sm-3 col-md-2'>
@@ -734,7 +734,7 @@ export default function AddTransactionPage() {
                                             </div>
                                         </div>
 
-                                    )}
+                                    )} */}
                                     
                                     <div className='d-flex align-items-center mb-4 cancel-dflex'>
                                         <div className='col-4 col-sm-3 col-md-2'>
@@ -875,7 +875,7 @@ export default function AddTransactionPage() {
                                             </select>
                                         </div>
                                     </div>
-                                    {accountCategory === 'card' && (
+                                    {/* {accountCategory === 'card' && (
                                         <div className='d-flex align-items-center mb-4 cancel-dflex'>
                                             <div className='col-4 col-sm-3 col-md-2'>
                                                 <label className='form-label p-0 m-0 me-2'>Card</label>
@@ -887,7 +887,7 @@ export default function AddTransactionPage() {
                                                 </select>
                                             </div>
                                         </div>
-                                    )}
+                                    )} */}
                                     <div className='d-flex align-items-center mb-4 cancel-dflex'>
                                         <div className='col-4 col-sm-3 col-md-2'>
                                             <label className='form-label p-0 m-0 me-2'>Sub-category</label>
@@ -1002,7 +1002,7 @@ export default function AddTransactionPage() {
                                             <div className="d-flex align-items-center justify-content-between">
                                                 <div>
                                                     <CreditCardOutlined className='me-2' />
-                                                    <label className="large fw-bold">CARD (RHB)</label>
+                                                    <label className="large fw-bold">CARD</label>
                                                 </div>
                                                 
                                                 <label className="fw-bold text-success">MYR {getTotalByCategory('Card').toFixed(2)}</label>
@@ -1058,8 +1058,44 @@ export default function AddTransactionPage() {
                                 </div>
                             </Carousel>
                         </div>
-                        
-                        
+
+                        <div className="row mb-3 px-4">
+                            <div className="col-12">
+                                <div className="p-3 rounded shadow-sm bg-success text-white">
+                                
+                                {/* Header */}
+                                <div className="mb-2 border-bottom border-light pb-1">
+                                    <h6 className="fw-bold mb-0">Notes</h6>
+                                </div>
+
+                                {/* Content */}
+                                <ul className="list-unstyled mb-0 small">
+                                    <li className="d-flex align-items-start mb-1">
+                                        <span className="me-2">•</span>
+                                        <span>
+                                            <strong>Savings & Bliss:</strong> RHB Bank
+                                        </span>
+                                    </li>
+
+                                    <li className="d-flex align-items-start mb-1">
+                                        <span className="me-2">•</span>
+                                        <span>
+                                            <strong>Present:</strong> Maybank MAE
+                                        </span>
+                                    </li>
+
+                                    <li className="d-flex align-items-start">
+                                        <span className="me-2">•</span>
+                                        <span>
+                                            <strong>Past:</strong> Maybank Savings
+                                        </span>
+                                    </li>
+                                </ul>
+
+                                </div>
+                            </div>
+                        </div>
+
 
                     </div>
                 </div>
