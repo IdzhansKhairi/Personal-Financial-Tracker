@@ -1070,24 +1070,25 @@ export default function AddTransactionPage() {
 
                                 {/* Content */}
                                 <ul className="list-unstyled mb-0 small">
-                                    <li className="d-flex align-items-start mb-1">
-                                        <span className="me-2">•</span>
-                                        <span>
-                                            <strong>Savings & Bliss:</strong> RHB Bank
-                                        </span>
-                                    </li>
-
-                                    <li className="d-flex align-items-start mb-1">
-                                        <span className="me-2">•</span>
-                                        <span>
-                                            <strong>Present:</strong> Maybank MAE
-                                        </span>
-                                    </li>
-
+=
                                     <li className="d-flex align-items-start">
                                         <span className="me-2">•</span>
                                         <span>
-                                            <strong>Past:</strong> Maybank Savings
+                                            <strong>Past:</strong> Maybank Savings Account
+                                        </span>
+                                    </li>
+
+                                    <li className="d-flex align-items-start mb-1">
+                                        <span className="me-2">•</span>
+                                        <span>
+                                            <strong>Present:</strong> Maybank MAE Account
+                                        </span>
+                                    </li>
+
+                                    <li className="d-flex align-items-start mb-1">
+                                        <span className="me-2">•</span>
+                                        <span>
+                                            <strong>Savings & Bliss:</strong> RHB Savings Account
                                         </span>
                                     </li>
                                 </ul>
