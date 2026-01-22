@@ -1070,7 +1070,6 @@ export default function AddTransactionPage() {
 
                                 {/* Content */}
                                 <ul className="list-unstyled mb-0 small">
-=
                                     <li className="d-flex align-items-start">
                                         <span className="me-2">•</span>
                                         <span>
