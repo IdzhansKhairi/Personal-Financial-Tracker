@@ -310,7 +310,19 @@ export default function DashboardPage() {
 
         // Calculate cumulative savings balance at the end of each month
         const monthlyCumulativeBalance: { [key: string]: number } = {};
+
+        // Calculate carry-over balance from ALL years before selectedYear
         let runningBalance = 0;
+        transactions
+            .filter(t => t.transaction_sub_category === 'Savings' &&
+                         new Date(t.transaction_date).getFullYear() < selectedYear)
+            .forEach(t => {
+                if (t.transaction_income_source !== null) {
+                    runningBalance += t.transaction_amount;
+                } else if (t.transaction_expense_usage !== null) {
+                    runningBalance -= t.transaction_amount;
+                }
+            });
 
         monthNames.forEach((monthName, monthIndex) => {
             // Only calculate for months up to and including the latest month with data
