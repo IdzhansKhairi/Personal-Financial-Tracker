@@ -61,6 +61,7 @@ export type Database = {
           transaction_expense_usage: string | null
           transaction_hobby_category: string | null
           transaction_expense_usage_category: string | null
+          transaction_spending_beneficiary: string | null
         }
         Insert: Omit<Database['public']['Tables']['transaction_list_table']['Row'], 'transaction_id'>
         Update: Partial<Database['public']['Tables']['transaction_list_table']['Insert']>

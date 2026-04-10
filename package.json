@@ -15,6 +15,7 @@
     "db:migrate-debts-table": "npx tsx scripts/migrate-add-debts-table.ts",
     "db:migrate-auth-tables": "npx tsx scripts/migrate-add-auth-tables.ts",
     "db:migrate-remove-role": "npx tsx scripts/migrate-remove-role.ts",
+    "db:migrate-spending-beneficiary": "npx tsx scripts/migrate-add-spending-beneficiary.ts",
     "db:seed-user": "npx tsx scripts/seed-initial-user.ts"
   },
   "dependencies": {
@@ -22,8 +23,6 @@
     "@ant-design/icons": "^6.1.0",
     "@supabase/supabase-js": "^2.86.0",
     "@sweetalert2/theme-bootstrap-4": "^5.0.27",
-    "@types/bcrypt": "^6.0.0",
-    "ant-design": "^1.0.0",
     "antd": "^5.28.1",
     "bcrypt": "^6.0.0",
     "bootstrap": "^5.3.8",
@@ -39,6 +38,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

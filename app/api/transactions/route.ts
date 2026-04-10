@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
       transaction_income_source,
       transaction_expense_usage,
       transaction_hobby_category,
+      transaction_spending_beneficiary,
     } = body;
 
     // Automatically determine expense usage category from expense usage
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
       transaction_expense_usage: transaction_expense_usage || null,
       transaction_expense_usage_category: transaction_expense_usage_category || null,
       transaction_hobby_category: transaction_hobby_category || null,
+      transaction_spending_beneficiary: transaction_spending_beneficiary || null,
     });
 
     return NextResponse.json(
@@ -86,6 +88,7 @@ export async function PUT(request: NextRequest) {
       transaction_income_source,
       transaction_expense_usage,
       transaction_hobby_category,
+      transaction_spending_beneficiary,
     } = body;
 
     if (!transaction_id) {
@@ -114,6 +117,7 @@ export async function PUT(request: NextRequest) {
       transaction_expense_usage: transaction_expense_usage || null,
       transaction_expense_usage_category: transaction_expense_usage_category || null,
       transaction_hobby_category: transaction_hobby_category || null,
+      transaction_spending_beneficiary: transaction_spending_beneficiary || null,
     });
 
     return NextResponse.json({

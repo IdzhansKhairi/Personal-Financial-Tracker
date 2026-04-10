@@ -206,8 +206,8 @@ export class TransactionsAdapter {
           transaction_date, transaction_time, transaction_description,
           transaction_amount, transaction_category, transaction_sub_category,
           transaction_card_choice, transaction_income_source, transaction_expense_usage,
-          transaction_hobby_category, transaction_expense_usage_category
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          transaction_hobby_category, transaction_expense_usage_category, transaction_spending_beneficiary
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           transaction.transaction_date,
           transaction.transaction_time,
@@ -220,6 +220,7 @@ export class TransactionsAdapter {
           transaction.transaction_expense_usage,
           transaction.transaction_hobby_category,
           transaction.transaction_expense_usage_category,
+          transaction.transaction_spending_beneficiary,
         ]
       )
       await db.close()
@@ -245,7 +246,7 @@ export class TransactionsAdapter {
           transaction_date = ?, transaction_time = ?, transaction_description = ?,
           transaction_amount = ?, transaction_category = ?, transaction_sub_category = ?,
           transaction_card_choice = ?, transaction_income_source = ?, transaction_expense_usage = ?,
-          transaction_hobby_category = ?, transaction_expense_usage_category = ?
+          transaction_hobby_category = ?, transaction_expense_usage_category = ?, transaction_spending_beneficiary = ?
         WHERE transaction_id = ?`,
         [
           transaction.transaction_date,
@@ -259,6 +260,7 @@ export class TransactionsAdapter {
           transaction.transaction_expense_usage,
           transaction.transaction_hobby_category,
           transaction.transaction_expense_usage_category,
+          transaction.transaction_spending_beneficiary,
           id,
         ]
       )

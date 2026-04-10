@@ -61,6 +61,28 @@ export const hobbyLabels: Record<string, string> = {
     'technology': 'Technology',
 };
 
+export const spendingBeneficiaryLabels: Record<string, string> = {
+    'personal': 'Personal',
+    'family': 'Family',
+    'dating': 'Dating',
+    'friends': 'Friends',
+    'work': 'Work',
+    'charity': 'Charity',
+    'na': 'Not Applicable',
+};
+
+// Color mapping for spending beneficiary tags/charts
+export const spendingBeneficiaryColors: Record<string, string> = {
+    'personal': '#1890ff',   // Blue
+    'family': '#52c41a',     // Green
+    'dating': '#722ed1',     // Purple
+    'friends': '#fa8c16',    // Orange
+    'work': '#13c2c2',       // Teal
+    'charity': '#2f54eb',    // Indigo
+    'na': '#8c8c8c',         // Gray
+    'uncategorized': '#d9d9d9', // Light gray
+};
+
 // Expense usage to category mapping (based on optgroups in add-transaction)
 export const expenseUsageCategoryMapping: Record<string, string> = {
     // Living
@@ -132,4 +154,9 @@ export const getSourceOrUsageLabel = (
         return getExpenseUsageLabel(expenseUsage);
     }
     return '-';
+};
+
+export const getSpendingBeneficiaryLabel = (value: string | null): string => {
+    if (!value) return 'Uncategorized';
+    return spendingBeneficiaryLabels[value] || value;
 };

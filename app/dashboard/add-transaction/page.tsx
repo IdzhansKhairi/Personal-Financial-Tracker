@@ -59,6 +59,7 @@ export default function AddTransactionPage() {
     const [incomeSource, setIncomeSource] = useState("")
     const [expenseUsage, setExpenseUsage] = useState("")
     const [hobbyCategory, setHobbyCategory] = useState("")
+    const [spendingBeneficiary, setSpendingBeneficiary] = useState("")
     const [description, setDescription] = useState("")
     const [cardChoice, setCardChoice] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -395,6 +396,7 @@ export default function AddTransactionPage() {
         setIncomeSource("");
         setExpenseUsage("");
         setHobbyCategory("");
+        setSpendingBeneficiary("");
     };
 
     // Check if form is valid for submission
@@ -495,7 +497,8 @@ export default function AddTransactionPage() {
                         transaction_card_choice: accountCategory === 'card' ? (cardChoice || 'RHB') : null,
                         transaction_income_source: transactionType === 'income' ? incomeSource : null,
                         transaction_expense_usage: transactionType === 'expense' ? expenseUsage : null,
-                        transaction_hobby_category: expenseUsage === 'hobby' ? hobbyCategory : null
+                        transaction_hobby_category: expenseUsage === 'hobby' ? hobbyCategory : null,
+                        transaction_spending_beneficiary: transactionType === 'expense' && spendingBeneficiary ? spendingBeneficiary : null
                     })
                 });
 
@@ -969,6 +972,25 @@ export default function AddTransactionPage() {
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* Spending Beneficiary - Optional */}
+                                    <div className='d-flex align-items-center mb-4 cancel-dflex'>
+                                        <div className='col-4 col-sm-3 col-md-2'>
+                                            <label className='form-label p-0 m-0 me-2'>Spent For</label>
+                                        </div>
+                                        <div className='col-8 col-sm-9 col-md-10 cancel-col'>
+                                            <select className='form-select' value={spendingBeneficiary} onChange={(e) => setSpendingBeneficiary(e.target.value)}>
+                                                <option value="">Select who this is for (optional)</option>
+                                                <option value="personal">Personal</option>
+                                                <option value="family">Family</option>
+                                                <option value="dating">Dating</option>
+                                                <option value="friends">Friends</option>
+                                                <option value="work">Work</option>
+                                                <option value="charity">Charity</option>
+                                                <option value="na">Not Applicable</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                     
                                 </div>
                             )}

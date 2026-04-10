@@ -959,3 +959,46 @@
     padding: 0.5rem !important;
   }
 }
+
+/* ============================================
+   SPENDING INSIGHTS PAGE
+   ============================================ */
+@media (max-width: 768px) {
+  /* Summary cards stack to 2-per-row */
+  .insights-summary-card .card-body {
+    padding: 0.75rem !important;
+  }
+
+  .insights-summary-card h5 {
+    font-size: 0.95rem !important;
+  }
+
+  /* Percentage bar adjustments */
+  .insights-percentage-bar {
+    height: 36px !important;
+  }
+
+  .insights-percentage-bar .bar-segment {
+    font-size: 0.7rem !important;
+    min-width: 20px !important;
+  }
+
+  /* Chart container height */
+  .insights-chart-container {
+    min-height: 250px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .insights-percentage-bar {
+    height: 30px !important;
+  }
+
+  .insights-percentage-bar .bar-segment {
+    font-size: 0.6rem !important;
+  }
+
+  .insights-chart-container {
+    min-height: 200px !important;
+  }
+}

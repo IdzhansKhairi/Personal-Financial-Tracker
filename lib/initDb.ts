@@ -18,7 +18,8 @@ export async function initializeDatabase() {
       transaction_income_source TEXT,
       transaction_expense_usage TEXT,
       transaction_expense_usage_category TEXT,
-      transaction_hobby_category TEXT
+      transaction_hobby_category TEXT,
+      transaction_spending_beneficiary TEXT
     )
   `);
   console.log("Database initialized: transaction_list_table created");

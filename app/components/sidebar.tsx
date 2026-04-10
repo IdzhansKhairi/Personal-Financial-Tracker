@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { usePathname } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigationLoading } from "../contexts/NavigationLoadingContext";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -41,9 +42,13 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { startNavigation } = useNavigationLoading();
 
-  // Handle menu item click - close sidebar on mobile
-  const handleMenuClick = () => {
+  // Handle menu item click - close sidebar on mobile + trigger loading
+  const handleMenuClick = (info: any) => {
+    // Show loading overlay when navigating to a different page
+    startNavigation();
+
     if (typeof window !== 'undefined' && window.innerWidth <= 768 && onMenuClick) {
       onMenuClick();
     }
@@ -57,6 +62,7 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
       '/dashboard/finance-dashboard': 'finance-dashboard',
       '/dashboard/add-transaction': 'add-transaction',
       '/dashboard/transaction-record': 'transaction-record',
+      '/dashboard/spending-insights': 'spending-insights',
       '/dashboard/commitment': 'commitment',
       '/dashboard/wishlist': 'wishlist',
       '/dashboard/debts-tracker': 'debts'
@@ -71,7 +77,7 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
     const openKeys: string[] = [];
 
     // Transactions submenu
-    if (['/dashboard/add-transaction', '/dashboard/transaction-record'].includes(pathname)) {
+    if (['/dashboard/add-transaction', '/dashboard/transaction-record', '/dashboard/spending-insights'].includes(pathname)) {
       openKeys.push('transactions');
     }
 
@@ -103,21 +109,28 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
   // --------------------------------------------------------------------------------------------
 
   const transactionsChildren: MenuProps['items'] = [];
-  if(canAccess("/dashboard/add-transaction")) {
+  if (canAccess("/dashboard/add-transaction")) {
     transactionsChildren.push({
       key: 'add-transaction',
       icon: <i className='bi bi-currency-dollar'></i>,
       label: <Link href="/dashboard/add-transaction" className='text-decoration-none'>Add Transaction</Link>
     })
   }
-  if(canAccess("/dashboard/transaction-record")) {
+  if (canAccess("/dashboard/transaction-record")) {
     transactionsChildren.push({
       key: 'transaction-record',
       icon: <i className='bi bi-table'></i>,
       label: <Link href="/dashboard/transaction-record" className='text-decoration-none'>Transaction Records</Link>
     })
   }
-  if(transactionsChildren.length > 0) {
+  if (canAccess("/dashboard/spending-insights")) {
+    transactionsChildren.push({
+      key: 'spending-insights',
+      icon: <i className='bi bi-bar-chart-line'></i>,
+      label: <Link href="/dashboard/spending-insights" className='text-decoration-none'>Spending Insights</Link>
+    })
+  }
+  if (transactionsChildren.length > 0) {
     sidebarItems.push({
       key: 'transactions',
       icon: <i className='bi bi-journal-text'></i>,
@@ -125,30 +138,30 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
       children: transactionsChildren
     })
   }
-  
+
   const budgetingChildren: MenuProps['items'] = [];
-  if(canAccess("/dashboard/commitment")) {
+  if (canAccess("/dashboard/commitment")) {
     budgetingChildren.push({
       key: 'commitment',
       icon: <i className='bi bi-cash-stack'></i>,
       label: <Link href="/dashboard/commitment" className='text-decoration-none'>Commitments</Link>
     })
   }
-  if(canAccess("/dashboard/commitment")) {
+  if (canAccess("/dashboard/commitment")) {
     budgetingChildren.push({
       key: 'wishlist',
       icon: <i className='bi bi-gift'></i>,
       label: <Link href="/dashboard/wishlist" className='text-decoration-none'>Wishlists</Link>
     })
   }
-  if(canAccess("/dashboard/debts-tracker")) {
+  if (canAccess("/dashboard/debts-tracker")) {
     budgetingChildren.push({
       key: 'debts',
       icon: <i className='bi bi-person-check'></i>,
       label: <Link href="/dashboard/debts-tracker" className='text-decoration-none'>Debts</Link>
     })
   }
-  if(budgetingChildren.length > 0) {
+  if (budgetingChildren.length > 0) {
     sidebarItems.push({
       key: 'budgeting',
       icon: <i className='bi bi-wallet2'></i>,
@@ -156,27 +169,27 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
       children: budgetingChildren
     })
   }
-  
+
   // --------------------------------------------------------------------------------------------
 
   const getLinkClass = (path: string) =>
-    pathname === path 
+    pathname === path
       ? "sidebar-link active" : "sidebar-link";
-  
+
   return (
 
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased bg-dark h-100`}>
       <Sider trigger={null} collapsible width={290} className='bg-dark' collapsed={!isOpen}>
         <Menu
-            mode="inline"
-            selectedKeys={getActiveKey()}
-            defaultOpenKeys={getOpenKeys()}
-            style={{ borderInlineEnd: 0 }}
-            className='bg-dark h-100'
-            theme="dark"
-            items={sidebarItems}
-            onClick={handleMenuClick}
-          />
+          mode="inline"
+          selectedKeys={getActiveKey()}
+          defaultOpenKeys={getOpenKeys()}
+          style={{ borderInlineEnd: 0 }}
+          className='bg-dark h-100'
+          theme="dark"
+          items={sidebarItems}
+          onClick={handleMenuClick}
+        />
       </Sider>
     </div>
 
@@ -196,7 +209,7 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
     //         {/* Visitor Management Section */}
     //         {(canAccess("/dashboard/registration") || canAccess("/dashboard/visitor-list")) && (
     //           <div className="mb-4">
-              
+
     //             <h6 className="p-1 ps-2 pb-0 mb-0 text-secondary">Visitor Management</h6>
 
     //             {canAccess("/dashboard/registration") && (
@@ -204,16 +217,16 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
     //                 <i className="bi bi-person-check me-2"></i>Registration
     //               </Link>
     //             )}
-                
+
     //             {canAccess("/dashboard/visitor-list") && (
     //               <Link href="/dashboard/visitor-list" className={`p-1 ps-2 my-1 ${getLinkClass("/dashboard/visitor-list")}`}>
     //                 <i className="bi bi-card-list me-2"></i>Visitor List
     //               </Link>
     //             )}
-                
+
     //           </div>
     //         )}
-            
+
 
     //         {/* Admin Section */}
     //         {(canAccess("/dashboard/security-list") || canAccess("/dashboard/report")) && (

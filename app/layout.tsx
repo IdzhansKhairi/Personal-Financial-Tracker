@@ -5,7 +5,7 @@ import '@sweetalert2/theme-bootstrap-4/bootstrap-4.min.css';
 import './responsive.css';
 
 import type { ReactNode } from "react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
@@ -16,11 +16,12 @@ export const metadata: Metadata = {
       apple: 'icon.png', // optional
     },
   description: "Your personalized financial tracker",
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

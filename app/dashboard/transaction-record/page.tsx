@@ -26,6 +26,7 @@ interface Transaction {
     transaction_expense_usage: string | null;
     transaction_expense_usage_category: string | null;
     transaction_hobby_category: string | null;
+    transaction_spending_beneficiary: string | null;
 }
 
 interface AccountBalance {
