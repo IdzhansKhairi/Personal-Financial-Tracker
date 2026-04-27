@@ -4,8 +4,9 @@ import React from 'react'
 import Swal from 'sweetalert2';
 
 import { useState, useEffect } from "react"
-import { Table, Checkbox, Tooltip, Spin } from 'antd';
+import { Table, Checkbox, Tooltip, Spin, Tag } from 'antd';
 import type { TableColumnsType } from 'antd';
+import { setupMoneyInput } from '@/lib/input-helpers';
 
 interface Commitment {
     commitment_id: number;
@@ -28,12 +29,24 @@ interface PaymentStatus {
     commitment_name?: string;
 }
 
+interface LinkedInstallment {
+    commitment_id: number;
+    financing_id: number;
+    financing_name: string;
+    installment_id: number;
+    installment_amount: number;
+    installment_due_date: string;
+    installment_payment_status: string;
+    installment_paid_date: string | null;
+}
+
 export default function CommitmentPage() {
 
     const [commitmentsTypeView, setCommitmentTypeView] = useState("commitment_status")
     const [commitments, setCommitments] = useState<Commitment[]>([])
     const [allCommitments, setAllCommitments] = useState<Commitment[]>([])
     const [paymentStatuses, setPaymentStatuses] = useState<PaymentStatus[]>([])
+    const [linkedInstallments, setLinkedInstallments] = useState<LinkedInstallment[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [checkboxLoading, setCheckboxLoading] = useState<number | null>(null)
     const [isMobile, setIsMobile] = useState(false)
@@ -95,6 +108,17 @@ export default function CommitmentPage() {
         }
     };
 
+    // Fetch linked financing installment amounts for the selected month/year
+    const fetchLinkedInstallments = async () => {
+        try {
+            const response = await fetch(`/api/financing-commitment-link?month=${selectedMonth}&year=${selectedYear}`);
+            const data = await response.json();
+            setLinkedInstallments(data);
+        } catch (error) {
+            console.error('Failed to fetch linked installments:', error);
+        }
+    };
+
     // Load data on mount and when view changes
     useEffect(() => {
         if (commitmentsTypeView === 'current_commitments') {
@@ -106,13 +130,15 @@ export default function CommitmentPage() {
         } else if (commitmentsTypeView === 'commitment_status') {
             fetchCommitments('Active');
             fetchPaymentStatuses();
+            fetchLinkedInstallments();
         }
     }, [commitmentsTypeView]);
 
-    // Reload payment status when month/year changes
+    // Reload payment status and linked installments when month/year changes
     useEffect(() => {
         if (commitmentsTypeView === 'commitment_status') {
             fetchPaymentStatuses();
+            fetchLinkedInstallments();
         }
     }, [selectedMonth, selectedYear]);
 
@@ -128,6 +154,17 @@ export default function CommitmentPage() {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    // Get the linked installment for a specific commitment (if any)
+    const getLinkedInstallment = (commitment_id: number): LinkedInstallment | undefined => {
+        return linkedInstallments.find(li => li.commitment_id === commitment_id);
+    };
+
+    // Get effective monthly amount: use financing installment amount if linked, otherwise static
+    const getEffectiveMonthlyAmount = (commitment: Commitment): number => {
+        const linked = getLinkedInstallment(commitment.commitment_id);
+        return linked ? linked.installment_amount : commitment.commitment_per_month;
+    };
+
     // Calculate payment statistics
     const getPaidCount = () => {
         return paymentStatuses.filter(p => p.payment_status === 1).length;
@@ -140,13 +177,13 @@ export default function CommitmentPage() {
     const getTotalPaidAmount = () => {
         return commitments
             .filter(c => isCommitmentPaid(c.commitment_id))
-            .reduce((sum, c) => sum + c.commitment_per_month, 0);
+            .reduce((sum, c) => sum + getEffectiveMonthlyAmount(c), 0);
     };
 
     const getTotalUnpaidAmount = () => {
         return commitments
             .filter(c => !isCommitmentPaid(c.commitment_id))
-            .reduce((sum, c) => sum + c.commitment_per_month, 0);
+            .reduce((sum, c) => sum + getEffectiveMonthlyAmount(c), 0);
     };
 
     // Calculate total commitments amounts
@@ -185,7 +222,7 @@ export default function CommitmentPage() {
                                 <label class='form-label'>Monthly Total <span class='text-danger'>*</span></label>
                                 <div class='input-group'>
                                     <span class='input-group-text'>MYR</span>
-                                    <input id='commitment-monthly' type='number' step='0.01' class='form-control' placeholder='0.00'></input>
+                                    <input id='commitment-monthly' type='text' class='form-control' placeholder='0.00'></input>
                                 </div>
                             </div>
                             <div class='col-6 cancel-col mb-4 cancel-px'>
@@ -214,8 +251,10 @@ export default function CommitmentPage() {
             didOpen: () => {
                 const monthlyInput = document.getElementById('commitment-monthly') as HTMLInputElement;
                 const yearlyInput = document.getElementById('commitment-yearly') as HTMLInputElement;
+                const getMonthlyValue = monthlyInput ? setupMoneyInput(monthlyInput) : () => 0;
+                
                 monthlyInput?.addEventListener('input', () => {
-                    const monthly = parseFloat(monthlyInput.value) || 0;
+                    const monthly = getMonthlyValue();
                     yearlyInput.value = (monthly * 12).toFixed(2);
                 });
             },
@@ -281,7 +320,7 @@ export default function CommitmentPage() {
                                 <label class='form-label'>Monthly Total <span class='text-danger'>*</span></label>
                                 <div class='input-group'>
                                     <span class='input-group-text'>MYR</span>
-                                    <input id='edit-commitment-monthly' type='number' step='0.01' class='form-control' value='${commitment.commitment_per_month}'></input>
+                                    <input id='edit-commitment-monthly' type='text' class='form-control' value='${commitment.commitment_per_month ? commitment.commitment_per_month.toFixed(2) : ''}'></input>
                                 </div>
                             </div>
                             <div class='col-6 cancel-col mb-4 cancel-px'>
@@ -319,8 +358,10 @@ export default function CommitmentPage() {
             didOpen: () => {
                 const monthlyInput = document.getElementById('edit-commitment-monthly') as HTMLInputElement;
                 const yearlyInput = document.getElementById('edit-commitment-yearly') as HTMLInputElement;
+                const getMonthlyValue = monthlyInput ? setupMoneyInput(monthlyInput) : () => 0;
+                
                 monthlyInput?.addEventListener('input', () => {
-                    const monthly = parseFloat(monthlyInput.value) || 0;
+                    const monthly = getMonthlyValue();
                     yearlyInput.value = (monthly * 12).toFixed(2);
                 });
             },
@@ -421,7 +462,7 @@ export default function CommitmentPage() {
                                 <label class='form-label'>Monthly Total <span class='text-danger'>*</span></label>
                                 <div class='input-group'>
                                     <span class='input-group-text'>MYR</span>
-                                    <input id='future-commitment-monthly' type='number' step='0.01' class='form-control' placeholder='0.00'></input>
+                                    <input id='future-commitment-monthly' type='text' class='form-control' placeholder='0.00'></input>
                                 </div>
                             </div>
                             <div class='col-6 cancel-col mb-4 cancel-px'>
@@ -467,8 +508,10 @@ export default function CommitmentPage() {
             didOpen: () => {
                 const monthlyInput = document.getElementById('future-commitment-monthly') as HTMLInputElement;
                 const yearlyInput = document.getElementById('future-commitment-yearly') as HTMLInputElement;
+                const getMonthlyValue = monthlyInput ? setupMoneyInput(monthlyInput) : () => 0;
+                
                 monthlyInput?.addEventListener('input', () => {
-                    const monthly = parseFloat(monthlyInput.value) || 0;
+                    const monthly = getMonthlyValue();
                     yearlyInput.value = (monthly * 12).toFixed(2);
                 });
             },
@@ -520,12 +563,13 @@ export default function CommitmentPage() {
     }
 
     // Toggle payment status with loading and toast notification
+    // Also syncs with financing installments if the commitment is linked
     const togglePaymentStatus = async (commitment_id: number, commitment_name: string, checked: boolean) => {
         setCheckboxLoading(commitment_id);
 
         try {
-            // Simulate minimum 1 second loading
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Simulate minimum 0.5 second loading
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             const response = await fetch('/api/commitment-payments', {
                 method: 'POST',
@@ -539,7 +583,27 @@ export default function CommitmentPage() {
             });
 
             if (response.ok) {
+                // Bi-directional sync: also update linked financing installment
+                const linked = getLinkedInstallment(commitment_id);
+                if (linked) {
+                    try {
+                        await fetch('/api/financing-installments', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                installment_id: linked.installment_id,
+                                payment_status: checked ? 'paid' : 'pending',
+                                amount_paid: checked ? linked.installment_amount : 0,
+                                paid_date: checked ? new Date().toISOString().split('T')[0] : null
+                            })
+                        });
+                    } catch (syncError) {
+                        console.error('Failed to sync financing installment:', syncError);
+                    }
+                }
+
                 await fetchPaymentStatuses();
+                await fetchLinkedInstallments();
 
                 // Show toast notification
                 Toast.fire({
@@ -693,14 +757,41 @@ export default function CommitmentPage() {
     const paymentStatusColumns: TableColumnsType<Commitment> = [
         {
             title: 'Commitment Name',
-            dataIndex: 'commitment_name',
             key: 'commitment_name',
+            render: (_, record) => {
+                const linked = getLinkedInstallment(record.commitment_id);
+                return (
+                    <div>
+                        <div className='d-flex align-items-center gap-2'>
+                            <span>{record.commitment_name}</span>
+                            {linked && (
+                                <Tag color='blue' style={{ fontSize: '10px', lineHeight: '16px', padding: '0 4px', margin: 0 }}>📊 Financing</Tag>
+                            )}
+                        </div>
+                        {linked && (
+                            <small className='text-muted'>Due: {new Date(linked.installment_due_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</small>
+                        )}
+                    </div>
+                );
+            }
         },
         {
             title: 'Monthly Amount',
-            dataIndex: 'commitment_per_month',
             key: 'commitment_per_month',
-            render: (value) => `MYR ${value.toFixed(2)}`
+            render: (_, record) => {
+                const linked = getLinkedInstallment(record.commitment_id);
+                const effectiveAmount = getEffectiveMonthlyAmount(record);
+                return (
+                    <div>
+                        <span>MYR {effectiveAmount.toFixed(2)}</span>
+                        {linked && linked.installment_amount !== record.commitment_per_month && (
+                            <small className='d-block text-muted' style={{ textDecoration: 'line-through', fontSize: '11px' }}>
+                                Default: MYR {record.commitment_per_month.toFixed(2)}
+                            </small>
+                        )}
+                    </div>
+                );
+            }
         },
         {
             title: 'Status',

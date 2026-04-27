@@ -16,7 +16,9 @@
     "db:migrate-auth-tables": "npx tsx scripts/migrate-add-auth-tables.ts",
     "db:migrate-remove-role": "npx tsx scripts/migrate-remove-role.ts",
     "db:migrate-spending-beneficiary": "npx tsx scripts/migrate-add-spending-beneficiary.ts",
-    "db:seed-user": "npx tsx scripts/seed-initial-user.ts"
+    "db:seed-user": "npx tsx scripts/seed-initial-user.ts",
+    "db:seed-admin": "npx tsx scripts/seed-admin-test-user.ts",
+    "db:migrate-financing": "npx tsx scripts/migrate-add-financing-tables.ts"
   },
   "dependencies": {
     "@ant-design/charts": "^2.6.6",

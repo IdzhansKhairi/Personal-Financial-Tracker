@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/sidebar";
@@ -118,10 +118,26 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 // Separate component to access NavigationLoadingContext inside the provider
 function DashboardContent({ children }: { children: ReactNode }) {
   const { isNavigating } = useNavigationLoading();
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top when navigation starts so the overlay is immediately visible
+  useEffect(() => {
+    if (isNavigating && contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
+  }, [isNavigating]);
 
   return (
-    <div className="flex-grow-1 p-3 px-4 background content-wrapper" style={{ height: '100%', overflow: 'auto', position: 'relative' }}>
-      {/* Navigation Loading Overlay */}
+    <div
+      ref={contentRef}
+      className="flex-grow-1 p-3 px-4 background content-wrapper"
+      style={{
+        height: '100%',
+        overflow: isNavigating ? 'hidden' : 'auto',
+        position: 'relative',
+      }}
+    >
+      {/* Navigation Loading Overlay — scoped to content area only */}
       {isNavigating && (
         <div
           style={{
@@ -130,13 +146,13 @@ function DashboardContent({ children }: { children: ReactNode }) {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(245, 245, 245, 0.8)',
+            backgroundColor: 'rgba(245, 245, 245, 0.85)',
             zIndex: 100,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            backdropFilter: 'blur(2px)',
+            backdropFilter: 'blur(3px)',
           }}
         >
           <div className="spinner-border text-primary mb-2" role="status" style={{ width: '2.5rem', height: '2.5rem' }}>

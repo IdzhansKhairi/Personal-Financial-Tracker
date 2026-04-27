@@ -11,3 +11,27 @@
     min-height: calc(100vh - 72px);
     /* Adjust 72px to match your actual header height */
 }
+
+/* SweetAlert2 Wizard Button Layout: Back (left) | Cancel (center, red) | Next (right) */
+.swal2-actions.swal-wizard-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    width: 100%;
+    padding: 0 1.5rem;
+    gap: 0.5rem;
+}
+
+.swal-wizard-actions .swal2-deny {
+    order: 1 !important;
+}
+
+.swal-wizard-actions .swal2-cancel {
+    order: 2 !important;
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+.swal-wizard-actions .swal2-confirm {
+    order: 3 !important;
+}

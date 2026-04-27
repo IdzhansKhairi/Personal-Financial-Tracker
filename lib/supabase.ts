@@ -133,6 +133,40 @@ export type Database = {
         Insert: Omit<Database['public']['Tables']['debts_table']['Row'], 'debt_id'>
         Update: Partial<Database['public']['Tables']['debts_table']['Insert']>
       }
+      financing_plan_table: {
+        Row: {
+          financing_id: number
+          financing_name: string
+          financing_provider: string | null
+          financing_category: string
+          total_amount: number
+          total_months: number
+          monthly_amount_default: number
+          start_date: string
+          end_date: string | null
+          notes: string | null
+          status: string
+          linked_commitment_id: number | null
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['financing_plan_table']['Row'], 'financing_id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['financing_plan_table']['Insert']>
+      }
+      financing_installment_table: {
+        Row: {
+          installment_id: number
+          financing_id: number
+          installment_number: number
+          due_date: string
+          amount_due: number
+          amount_paid: number
+          payment_status: string
+          paid_date: string | null
+          notes: string | null
+        }
+        Insert: Omit<Database['public']['Tables']['financing_installment_table']['Row'], 'installment_id'>
+        Update: Partial<Database['public']['Tables']['financing_installment_table']['Insert']>
+      }
     }
   }
 }

@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { useState, useEffect } from "react"
 import { Table, Tooltip, Select } from 'antd';
 import type { TableColumnsType } from 'antd';
+import { setupMoneyInput } from '@/lib/input-helpers';
 
 interface Debt {
     debt_id: number;
@@ -124,7 +125,10 @@ export default function DebtsTracker() {
                     </div>
                     <div class='mb-4'>
                         <label class='form-label'>Amount (MYR) <span class='text-danger'>*</span></label>
-                        <input id='amount' type='number' step='0.01' class='form-control' placeholder='0.00'></input>
+                        <div class='input-group'>
+                            <span class='input-group-text'>MYR</span>
+                            <input id='amount' type='text' class='form-control' placeholder='0.00'></input>
+                        </div>
                     </div>
                     <div class='mb-4'>
                         <label class='form-label'>Created Date <span class='text-danger'>*</span></label>
@@ -148,6 +152,10 @@ export default function DebtsTracker() {
             confirmButtonColor: "#28a745",
             showCancelButton: true,
             cancelButtonText: "Cancel",
+            didOpen: () => {
+                const amountInput = document.getElementById('amount') as HTMLInputElement;
+                if (amountInput) setupMoneyInput(amountInput);
+            },
             preConfirm: () => {
                 const debtType = (document.getElementById('debt-type') as HTMLSelectElement).value;
                 const personName = (document.getElementById('person-name') as HTMLInputElement).value;
@@ -211,7 +219,10 @@ export default function DebtsTracker() {
                     </div>
                     <div class='mb-4'>
                         <label class='form-label'>Amount (MYR) <span class='text-danger'>*</span></label>
-                        <input id='edit-amount' type='number' step='0.01' class='form-control' value='${debt.amount}'></input>
+                        <div class='input-group'>
+                            <span class='input-group-text'>MYR</span>
+                            <input id='edit-amount' type='text' class='form-control' value='${debt.amount ? debt.amount.toFixed(2) : ''}'></input>
+                        </div>
                     </div>
                     <div class='mb-4'>
                         <label class='form-label'>Created Date <span class='text-danger'>*</span></label>
@@ -235,6 +246,10 @@ export default function DebtsTracker() {
             confirmButtonColor: "#28a745",
             showCancelButton: true,
             cancelButtonText: "Cancel",
+            didOpen: () => {
+                const amountInput = document.getElementById('edit-amount') as HTMLInputElement;
+                if (amountInput) setupMoneyInput(amountInput);
+            },
             preConfirm: () => {
                 const debtType = (document.getElementById('edit-debt-type') as HTMLSelectElement).value;
                 const personName = (document.getElementById('edit-person-name') as HTMLInputElement).value;

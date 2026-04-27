@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import { useState, useEffect } from "react"
 import { Table, Tooltip, Progress } from 'antd';
 import type { TableColumnsType } from 'antd';
+import { setupMoneyInput } from '@/lib/input-helpers';
 
 interface WishlistItem {
     wishlist_id: number;
@@ -106,7 +107,7 @@ export default function WishlistPage() {
     };
 
     // View wishlist item details
-    const viewWishlist = async(item: WishlistItem) => {
+    const viewWishlist = async (item: WishlistItem) => {
         const result = await Swal.fire({
             title: 'Wishlist Item Details',
             html: `
@@ -123,7 +124,7 @@ export default function WishlistPage() {
                     </div>
                     <div class='mb-4'>
                         <label class='form-label'>Estimated Price (MYR)</label>
-                        <input id='view-wishlist-estimate-price' type='number' step='0.01' class='form-control' value='${item.wishlist_estimate_price || ''}' disabled placeholder='0.00'></input>
+                        <input id='view-wishlist-estimate-price' type='number' step='0.01' class='form-control' value='${item.wishlist_estimate_price?.toFixed(2) || ''}' disabled placeholder='0.00'></input>
                     </div>
                     <div class='mb-4'>
                         <label class='form-label'>Product URL</label>
@@ -157,7 +158,7 @@ export default function WishlistPage() {
     };
 
     // View purchased item details
-    const viewPurchasedItem = async(item: WishlistItem) => {
+    const viewPurchasedItem = async (item: WishlistItem) => {
         const result = await Swal.fire({
             title: 'Purchased Item Details',
             html: `
@@ -175,11 +176,11 @@ export default function WishlistPage() {
                     <div class='row'>
                         <div class='col-6 cancel-col mb-4 cancel-px'>
                             <label class='form-label'>Estimated Price (MYR)</label>
-                            <input type='number' class='form-control' value='${item.wishlist_estimate_price || ''}' disabled></input>
+                            <input type='number' class='form-control' value='${item.wishlist_estimate_price?.toFixed(2) || ''}' disabled></input>
                         </div>
                         <div class='col-6 cancel-col mb-4 cancel-px'>
                             <label class='form-label'>Final Price (MYR)</label>
-                            <input type='number' class='form-control' value='${item.wishlist_final_price || ''}' disabled></input>
+                            <input type='number' class='form-control' value='${item.wishlist_final_price?.toFixed(2) || ''}' disabled></input>
                         </div>
                     </div>
                     <div class='mb-4'>
@@ -217,7 +218,7 @@ export default function WishlistPage() {
         }
     };
 
-    const addWishlist = async() => {
+    const addWishlist = async () => {
         const result = await Swal.fire({
             title: 'Add New Wishlist Item',
             html: `
@@ -235,7 +236,10 @@ export default function WishlistPage() {
                     </div>
                     <div class='mb-4'>
                         <label class='form-label'>Estimated Price (MYR)</label>
-                        <input id='wishlist-estimate-price' type='number' step='0.01' class='form-control' placeholder='0.00'></input>
+                        <div class='input-group'>
+                            <span class='input-group-text'>MYR</span>
+                            <input id='wishlist-estimate-price' type='text' class='form-control' placeholder='0.00'></input>
+                        </div>
                     </div>
                     <div class='mb-4'>
                         <label class='form-label'>Product URL</label>
@@ -255,6 +259,10 @@ export default function WishlistPage() {
             confirmButtonColor: "#28a745",
             showCancelButton: true,
             cancelButtonText: "Cancel",
+            didOpen: () => {
+                const priceInput = document.getElementById('wishlist-estimate-price') as HTMLInputElement;
+                if (priceInput) setupMoneyInput(priceInput);
+            },
             preConfirm: () => {
                 const name = (document.getElementById('wishlist-name') as HTMLInputElement).value;
                 const category = (document.getElementById('wishlist-category') as HTMLSelectElement).value;
@@ -298,7 +306,7 @@ export default function WishlistPage() {
         }
     }
 
-    const editWishlist = async(item: WishlistItem) => {
+    const editWishlist = async (item: WishlistItem) => {
         const result = await Swal.fire({
             title: 'Edit Wishlist Item',
             html: `
@@ -315,7 +323,10 @@ export default function WishlistPage() {
                     </div>
                     <div class='mb-4'>
                         <label class='form-label'>Estimated Price (MYR)</label>
-                        <input id='edit-wishlist-estimate-price' type='number' step='0.01' class='form-control' value='${item.wishlist_estimate_price || ''}' placeholder='0.00'></input>
+                        <div class='input-group'>
+                            <span class='input-group-text'>MYR</span>
+                            <input id='edit-wishlist-estimate-price' type='text' class='form-control' value='${item.wishlist_estimate_price ? item.wishlist_estimate_price.toFixed(2) : ''}' placeholder='0.00'></input>
+                        </div>
                     </div>
                     <div class='mb-4'>
                         <label class='form-label'>Product URL</label>
@@ -335,6 +346,10 @@ export default function WishlistPage() {
             confirmButtonColor: "#28a745",
             showCancelButton: true,
             cancelButtonText: "Cancel",
+            didOpen: () => {
+                const priceInput = document.getElementById('edit-wishlist-estimate-price') as HTMLInputElement;
+                if (priceInput) setupMoneyInput(priceInput);
+            },
             preConfirm: () => {
                 const name = (document.getElementById('edit-wishlist-name') as HTMLInputElement).value;
                 const category = (document.getElementById('edit-wishlist-category') as HTMLSelectElement).value;
@@ -385,7 +400,7 @@ export default function WishlistPage() {
         }
     }
 
-    const deleteWishlist = async(wishlist_id: number, wishlist_name: string) => {
+    const deleteWishlist = async (wishlist_id: number, wishlist_name: string) => {
         const result = await Swal.fire({
             title: 'Delete Wishlist Item?',
             text: `Are you sure you want to delete "${wishlist_name}"? This action cannot be undone.`,
@@ -416,7 +431,7 @@ export default function WishlistPage() {
         }
     }
 
-    const markAsPurchased = async(item: WishlistItem) => {
+    const markAsPurchased = async (item: WishlistItem) => {
         const result = await Swal.fire({
             title: 'Mark as Purchased',
             html: `
@@ -424,7 +439,10 @@ export default function WishlistPage() {
                     <p>Mark "${item.wishlist_name}" as purchased?</p>
                     <div class='mb-4'>
                         <label class='form-label'>Final Price (MYR) <span class='text-danger'>*</span></label>
-                        <input id='final-price' type='number' step='0.01' class='form-control' value='${item.wishlist_estimate_price || ''}' placeholder='0.00'></input>
+                        <div class='input-group'>
+                            <span class='input-group-text'>MYR</span>
+                            <input id='final-price' type='text' class='form-control' value='${item.wishlist_estimate_price ? item.wishlist_estimate_price.toFixed(2) : ''}' placeholder='0.00'></input>
+                        </div>
                     </div>
                     <div class='mb-4'>
                         <label class='form-label'>Purchase Date <span class='text-danger'>*</span></label>
@@ -438,6 +456,10 @@ export default function WishlistPage() {
             cancelButtonColor: '#6c757d',
             confirmButtonText: 'Yes, mark as purchased!',
             cancelButtonText: 'Cancel',
+            didOpen: () => {
+                const priceInput = document.getElementById('final-price') as HTMLInputElement;
+                if (priceInput) setupMoneyInput(priceInput);
+            },
             preConfirm: () => {
                 const finalPrice = (document.getElementById('final-price') as HTMLInputElement).value;
                 const purchaseDate = (document.getElementById('purchase-date') as HTMLInputElement).value;

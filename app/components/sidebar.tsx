@@ -65,7 +65,8 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
       '/dashboard/spending-insights': 'spending-insights',
       '/dashboard/commitment': 'commitment',
       '/dashboard/wishlist': 'wishlist',
-      '/dashboard/debts-tracker': 'debts'
+      '/dashboard/debts-tracker': 'debts',
+      '/dashboard/financing': 'financing'
     };
 
     const key = pathToKey[pathname];
@@ -82,7 +83,7 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
     }
 
     // Budgeting submenu
-    if (['/dashboard/commitment', '/dashboard/wishlist', '/dashboard/debts-tracker'].includes(pathname)) {
+    if (['/dashboard/commitment', '/dashboard/wishlist', '/dashboard/debts-tracker', '/dashboard/financing'].includes(pathname)) {
       openKeys.push('budgeting');
     }
 
@@ -145,6 +146,13 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
       key: 'commitment',
       icon: <i className='bi bi-cash-stack'></i>,
       label: <Link href="/dashboard/commitment" className='text-decoration-none'>Commitments</Link>
+    })
+  }
+  if (canAccess("/dashboard/financing")) {
+    budgetingChildren.push({
+      key: 'financing',
+      icon: <i className='bi bi-bank'></i>,
+      label: <Link href="/dashboard/financing" className='text-decoration-none'>Financing</Link>
     })
   }
   if (canAccess("/dashboard/commitment")) {

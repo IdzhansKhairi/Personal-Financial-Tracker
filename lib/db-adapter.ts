@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 import type { Database } from './supabase'
 
 // Helper to determine which database to use
-export function useSupabase(module: 'dashboard' | 'transactions' | 'accounts' | 'commitments' | 'wishlist' | 'debts' | 'auth'): boolean {
+export function useSupabase(module: 'dashboard' | 'transactions' | 'accounts' | 'commitments' | 'wishlist' | 'debts' | 'financing' | 'auth'): boolean {
   const envMap = {
     dashboard: process.env.USE_SUPABASE_DASHBOARD === 'true',
     transactions: process.env.USE_SUPABASE_TRANSACTIONS === 'true',
@@ -11,6 +11,7 @@ export function useSupabase(module: 'dashboard' | 'transactions' | 'accounts' | 
     commitments: process.env.USE_SUPABASE_COMMITMENTS === 'true',
     wishlist: process.env.USE_SUPABASE_WISHLIST === 'true',
     debts: process.env.USE_SUPABASE_DEBTS === 'true',
+    financing: process.env.USE_SUPABASE_FINANCING === 'true',
     auth: process.env.USE_SUPABASE_AUTH === 'true',
   }
   return envMap[module] || false
@@ -778,6 +779,354 @@ export class DebtsAdapter {
       const db = await openDB()
       await db.run('DELETE FROM debts_table WHERE debt_id = ?', [id])
       await db.close()
+    }
+  }
+}
+
+// Financing Plan Adapter
+export class FinancingAdapter {
+  static async getAll(filters?: { status?: string; category?: string }) {
+    if (useSupabase('financing')) {
+      let query = supabase
+        .from('financing_plan_table')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (filters?.status) query = query.eq('status', filters.status)
+      if (filters?.category) query = query.eq('financing_category', filters.category)
+
+      const { data, error } = await query
+      if (error) throw error
+      return data || []
+    } else {
+      const db = await openDB()
+      let query = 'SELECT * FROM financing_plan_table WHERE 1=1'
+      const params: any[] = []
+
+      if (filters?.status) {
+        query += ' AND status = ?'
+        params.push(filters.status)
+      }
+      if (filters?.category) {
+        query += ' AND financing_category = ?'
+        params.push(filters.category)
+      }
+
+      query += ' ORDER BY created_at DESC'
+      const plans = await db.all(query, params)
+      await db.close()
+      return plans
+    }
+  }
+
+  static async getById(id: number) {
+    if (useSupabase('financing')) {
+      const { data, error } = await supabase
+        .from('financing_plan_table')
+        .select('*')
+        .eq('financing_id', id)
+        .single()
+
+      if (error) throw error
+      return data
+    } else {
+      const db = await openDB()
+      const plan = await db.get('SELECT * FROM financing_plan_table WHERE financing_id = ?', [id])
+      await db.close()
+      return plan
+    }
+  }
+
+  static async create(plan: Database['public']['Tables']['financing_plan_table']['Insert']) {
+    if (useSupabase('financing')) {
+      const { data, error } = await supabase
+        .from('financing_plan_table')
+        .insert(plan)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    } else {
+      const db = await openDB()
+      const result = await db.run(
+        `INSERT INTO financing_plan_table (
+          financing_name, financing_provider, financing_category,
+          total_amount, total_months, monthly_amount_default,
+          start_date, end_date, notes, status, linked_commitment_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          plan.financing_name,
+          plan.financing_provider || null,
+          plan.financing_category,
+          plan.total_amount,
+          plan.total_months,
+          plan.monthly_amount_default,
+          plan.start_date,
+          plan.end_date || null,
+          plan.notes || null,
+          plan.status || 'active',
+          plan.linked_commitment_id || null
+        ]
+      )
+      await db.close()
+      return { financing_id: result.lastID, ...plan }
+    }
+  }
+
+  static async update(id: number, plan: Database['public']['Tables']['financing_plan_table']['Update']) {
+    if (useSupabase('financing')) {
+      const { data, error } = await supabase
+        .from('financing_plan_table')
+        .update(plan)
+        .eq('financing_id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    } else {
+      const db = await openDB()
+      const fields = Object.keys(plan).filter(k => plan[k as keyof typeof plan] !== undefined)
+      const values = fields.map(k => plan[k as keyof typeof plan] ?? null)
+      const setClause = fields.map(f => `${f} = ?`).join(', ')
+
+      await db.run(
+        `UPDATE financing_plan_table SET ${setClause} WHERE financing_id = ?`,
+        [...values, id]
+      )
+      await db.close()
+      return { financing_id: id, ...plan }
+    }
+  }
+
+  static async delete(id: number) {
+    if (useSupabase('financing')) {
+      const { error } = await supabase
+        .from('financing_plan_table')
+        .delete()
+        .eq('financing_id', id)
+
+      if (error) throw error
+    } else {
+      const db = await openDB()
+      await db.run('DELETE FROM financing_plan_table WHERE financing_id = ?', [id])
+      await db.close()
+    }
+  }
+}
+
+// Financing Installments Adapter
+export class FinancingInstallmentsAdapter {
+  static async getByFinancingId(financingId: number) {
+    if (useSupabase('financing')) {
+      const { data, error } = await supabase
+        .from('financing_installment_table')
+        .select('*')
+        .eq('financing_id', financingId)
+        .order('installment_number', { ascending: true })
+
+      if (error) throw error
+      return data || []
+    } else {
+      const db = await openDB()
+      const installments = await db.all(
+        'SELECT * FROM financing_installment_table WHERE financing_id = ? ORDER BY installment_number ASC',
+        [financingId]
+      )
+      await db.close()
+      return installments
+    }
+  }
+
+  static async getUpcoming(month: number, year: number) {
+    if (useSupabase('financing')) {
+      // Build date range for the month
+      const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`
+      const endMonth = month === 11 ? 0 : month + 1
+      const endYear = month === 11 ? year + 1 : year
+      const endDate = `${endYear}-${String(endMonth + 1).padStart(2, '0')}-01`
+
+      const { data, error } = await supabase
+        .from('financing_installment_table')
+        .select(`
+          *,
+          financing_plan_table(financing_name, financing_provider, financing_category, status)
+        `)
+        .gte('due_date', startDate)
+        .lt('due_date', endDate)
+        .order('due_date', { ascending: true })
+
+      if (error) throw error
+      return data || []
+    } else {
+      const db = await openDB()
+      const monthStr = String(month + 1).padStart(2, '0')
+      const endMonth = month === 11 ? 0 : month + 1
+      const endYear = month === 11 ? year + 1 : year
+      const endMonthStr = String(endMonth + 1).padStart(2, '0')
+
+      const installments = await db.all(
+        `SELECT fi.*, fp.financing_name, fp.financing_provider, fp.financing_category, fp.status as plan_status
+         FROM financing_installment_table fi
+         JOIN financing_plan_table fp ON fi.financing_id = fp.financing_id
+         WHERE fi.due_date >= ? AND fi.due_date < ? AND fp.status = 'active'
+         ORDER BY fi.due_date ASC`,
+        [`${year}-${monthStr}-01`, `${endYear}-${endMonthStr}-01`]
+      )
+      await db.close()
+      return installments
+    }
+  }
+
+  static async bulkCreate(installments: Database['public']['Tables']['financing_installment_table']['Insert'][]) {
+    if (useSupabase('financing')) {
+      const { data, error } = await supabase
+        .from('financing_installment_table')
+        .insert(installments)
+        .select()
+
+      if (error) throw error
+      return data || []
+    } else {
+      const db = await openDB()
+      const stmt = await db.prepare(
+        `INSERT INTO financing_installment_table (
+          financing_id, installment_number, due_date,
+          amount_due, amount_paid, payment_status, paid_date, notes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      )
+
+      for (const inst of installments) {
+        await stmt.run([
+          inst.financing_id,
+          inst.installment_number,
+          inst.due_date,
+          inst.amount_due,
+          inst.amount_paid || 0,
+          inst.payment_status || 'pending',
+          inst.paid_date || null,
+          inst.notes || null
+        ])
+      }
+
+      await stmt.finalize()
+      await db.close()
+      return installments
+    }
+  }
+
+  static async update(id: number, installment: Database['public']['Tables']['financing_installment_table']['Update']) {
+    if (useSupabase('financing')) {
+      const { data, error } = await supabase
+        .from('financing_installment_table')
+        .update(installment)
+        .eq('installment_id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    } else {
+      const db = await openDB()
+      const fields = Object.keys(installment).filter(k => installment[k as keyof typeof installment] !== undefined)
+      const values = fields.map(k => installment[k as keyof typeof installment] ?? null)
+      const setClause = fields.map(f => `${f} = ?`).join(', ')
+
+      await db.run(
+        `UPDATE financing_installment_table SET ${setClause} WHERE installment_id = ?`,
+        [...values, id]
+      )
+      await db.close()
+      return { installment_id: id, ...installment }
+    }
+  }
+
+  static async deleteByFinancingId(financingId: number) {
+    if (useSupabase('financing')) {
+      const { error } = await supabase
+        .from('financing_installment_table')
+        .delete()
+        .eq('financing_id', financingId)
+
+      if (error) throw error
+    } else {
+      const db = await openDB()
+      await db.run('DELETE FROM financing_installment_table WHERE financing_id = ?', [financingId])
+      await db.close()
+    }
+  }
+
+  /**
+   * Get installment amounts for all financing plans linked to commitments,
+   * filtered by a specific month/year. Used by the commitment page to
+   * display dynamic per-month amounts instead of flat commitment_per_month.
+   */
+  static async getLinkedCommitmentAmounts(month: number, year: number) {
+    const monthStr = String(month + 1).padStart(2, '0')
+    const endMonth = month === 11 ? 0 : month + 1
+    const endYear = month === 11 ? year + 1 : year
+    const endMonthStr = String(endMonth + 1).padStart(2, '0')
+    const startDate = `${year}-${monthStr}-01`
+    const endDate = `${endYear}-${endMonthStr}-01`
+
+    if (useSupabase('financing')) {
+      // First get financing plans with linked commitments
+      const { data: plans, error: plansError } = await supabase
+        .from('financing_plan_table')
+        .select('financing_id, financing_name, linked_commitment_id, status')
+        .not('linked_commitment_id', 'is', null)
+        .eq('status', 'active')
+
+      if (plansError) throw plansError
+      if (!plans || plans.length === 0) return []
+
+      const financingIds = plans.map(p => p.financing_id)
+
+      const { data: installments, error: instError } = await supabase
+        .from('financing_installment_table')
+        .select('*')
+        .in('financing_id', financingIds)
+        .gte('due_date', startDate)
+        .lt('due_date', endDate)
+
+      if (instError) throw instError
+
+      return (installments || []).map(inst => {
+        const plan = plans.find(p => p.financing_id === inst.financing_id)
+        return {
+          commitment_id: plan?.linked_commitment_id,
+          financing_id: inst.financing_id,
+          financing_name: plan?.financing_name,
+          installment_id: inst.installment_id,
+          installment_amount: inst.amount_due,
+          installment_due_date: inst.due_date,
+          installment_payment_status: inst.payment_status,
+          installment_paid_date: inst.paid_date,
+        }
+      })
+    } else {
+      const db = await openDB()
+      const results = await db.all(
+        `SELECT
+          fp.linked_commitment_id as commitment_id,
+          fi.financing_id,
+          fp.financing_name,
+          fi.installment_id,
+          fi.amount_due as installment_amount,
+          fi.due_date as installment_due_date,
+          fi.payment_status as installment_payment_status,
+          fi.paid_date as installment_paid_date
+        FROM financing_installment_table fi
+        JOIN financing_plan_table fp ON fi.financing_id = fp.financing_id
+        WHERE fp.linked_commitment_id IS NOT NULL
+          AND fp.status = 'active'
+          AND fi.due_date >= ? AND fi.due_date < ?
+        ORDER BY fi.due_date ASC`,
+        [startDate, endDate]
+      )
+      await db.close()
+      return results
     }
   }
 }
