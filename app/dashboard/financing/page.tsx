@@ -89,9 +89,14 @@ export default function FinancingPage() {
             const url = statusFilter === 'all' ? '/api/financing' : `/api/financing?status=${statusFilter}`;
             const response = await fetch(url);
             const data = await response.json();
-            setPlans(data);
-            // Pre-fetch installments for all plans so Monthly & Progress columns work immediately
-            fetchAllInstallments(data);
+            if (Array.isArray(data)) {
+                setPlans(data);
+                // Pre-fetch installments for all plans so Monthly & Progress columns work immediately
+                fetchAllInstallments(data);
+            } else {
+                console.error('API returned non-array:', data);
+                setPlans([]);
+            }
         } catch (error) {
             console.error('Failed to fetch financing plans:', error);
         } finally {
@@ -103,7 +108,12 @@ export default function FinancingPage() {
         try {
             const response = await fetch(`/api/financing-installments?month=${currentMonth}&year=${currentYear}`);
             const data = await response.json();
-            setUpcomingInstallments(data);
+            if (Array.isArray(data)) {
+                setUpcomingInstallments(data);
+            } else {
+                console.error('API returned non-array:', data);
+                setUpcomingInstallments([]);
+            }
         } catch (error) {
             console.error('Failed to fetch upcoming installments:', error);
         }
@@ -113,7 +123,12 @@ export default function FinancingPage() {
         try {
             const response = await fetch(`/api/financing-installments?financing_id=${financingId}`);
             const data = await response.json();
-            setExpandedInstallments(prev => ({ ...prev, [financingId]: data }));
+            if (Array.isArray(data)) {
+                setExpandedInstallments(prev => ({ ...prev, [financingId]: data }));
+            } else {
+                console.error('API returned non-array:', data);
+                setExpandedInstallments(prev => ({ ...prev, [financingId]: [] }));
+            }
         } catch (error) {
             console.error('Failed to fetch installments:', error);
         }

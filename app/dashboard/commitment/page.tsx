@@ -100,7 +100,12 @@ export default function CommitmentPage() {
             setIsLoading(true);
             const response = await fetch(`/api/commitment-payments?month=${selectedMonth}&year=${selectedYear}`);
             const data = await response.json();
-            setPaymentStatuses(data);
+            if (Array.isArray(data)) {
+                setPaymentStatuses(data);
+            } else {
+                console.error('API returned non-array:', data);
+                setPaymentStatuses([]);
+            }
         } catch (error) {
             console.error('Failed to fetch payment statuses:', error);
         } finally {
@@ -113,7 +118,12 @@ export default function CommitmentPage() {
         try {
             const response = await fetch(`/api/financing-commitment-link?month=${selectedMonth}&year=${selectedYear}`);
             const data = await response.json();
-            setLinkedInstallments(data);
+            if (Array.isArray(data)) {
+                setLinkedInstallments(data);
+            } else {
+                console.error('API returned non-array:', data);
+                setLinkedInstallments([]);
+            }
         } catch (error) {
             console.error('Failed to fetch linked installments:', error);
         }
