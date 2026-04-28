@@ -29,7 +29,7 @@
   h6 { font-size: 0.9rem; }
 
   /* Improve touch targets */
-  button,
+  button:not(.ant-table-row-expand-icon),
   .btn,
   a.icon-link {
     min-height: 44px;
