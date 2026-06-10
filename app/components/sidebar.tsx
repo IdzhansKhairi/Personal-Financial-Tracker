@@ -66,7 +66,8 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
       '/dashboard/commitment': 'commitment',
       '/dashboard/wishlist': 'wishlist',
       '/dashboard/debts-tracker': 'debts',
-      '/dashboard/financing': 'financing'
+      '/dashboard/financing': 'financing',
+      '/dashboard/payment-qr': 'payment-qr'
     };
 
     const key = pathToKey[pathname];
@@ -85,6 +86,11 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
     // Budgeting submenu
     if (['/dashboard/commitment', '/dashboard/wishlist', '/dashboard/debts-tracker', '/dashboard/financing'].includes(pathname)) {
       openKeys.push('budgeting');
+    }
+
+    // Quick Access submenu
+    if (['/dashboard/payment-qr'].includes(pathname)) {
+      openKeys.push('quick-access');
     }
 
     return openKeys;
@@ -175,6 +181,26 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
       icon: <i className='bi bi-wallet2'></i>,
       label: <span>Budgeting</span>,
       children: budgetingChildren
+    })
+  }
+
+  // Quick Access Section:
+  // --------------------------------------------------------------------------------------------
+
+  const quickAccessChildren: MenuProps['items'] = [];
+  if (canAccess("/dashboard/payment-qr")) {
+    quickAccessChildren.push({
+      key: 'payment-qr',
+      icon: <i className='bi bi-qr-code'></i>,
+      label: <Link href="/dashboard/payment-qr" className='text-decoration-none'>Payment QR</Link>
+    })
+  }
+  if (quickAccessChildren.length > 0) {
+    sidebarItems.push({
+      key: 'quick-access',
+      icon: <i className='bi bi-lightning-charge'></i>,
+      label: <span>Quick Access</span>,
+      children: quickAccessChildren
     })
   }
 

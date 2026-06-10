@@ -1002,3 +1002,51 @@
     min-height: 200px !important;
   }
 }
+
+/* ============================================
+   PAYMENT QR PAGE
+   ============================================ */
+@media (max-width: 768px) {
+  /* Toggle buttons full width */
+  .qr-toggle-buttons {
+    width: 100% !important;
+  }
+
+  .qr-toggle-buttons .btn {
+    flex: 1 1 50% !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Card adjustments */
+  .qr-card-body .qr-owner-name {
+    font-size: 0.85rem !important;
+  }
+
+  .qr-card-body .qr-bank-name {
+    font-size: 0.75rem !important;
+  }
+
+  .qr-card-body {
+    padding: 8px 10px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .qr-toggle-buttons .btn {
+    font-size: 0.8rem !important;
+    padding: 0.4rem 0.5rem !important;
+  }
+
+  .qr-card-body .qr-owner-name {
+    font-size: 0.8rem !important;
+  }
+
+  .qr-card-body .qr-bank-name {
+    font-size: 0.7rem !important;
+  }
+
+  .qr-image-placeholder i {
+    font-size: 2rem !important;
+  }
+}
+

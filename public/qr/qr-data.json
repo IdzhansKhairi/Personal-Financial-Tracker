@@ -1,0 +1,37 @@
+{
+  "myQR": [
+    {
+      "id": "maybank-mae",
+      "ownerName": "Idzhans Khairi",
+      "accountHolderName": "MUHAMMAD IDZHANS KHAIRI",
+      "bank": "Maybank (MAE)",
+      "accountNumber": "014271684888",
+      "imagePath": "/qr/personal/maybank-mae-qr-idzhans.jpeg"
+    },
+    {
+      "id": "maybank-savings",
+      "ownerName": "Idzhans Khairi",
+      "accountHolderName": "MUHAMMAD IDZHANS KHAIRI",
+      "bank": "Maybank (Savings)",
+      "accountNumber": "162759284166",
+      "imagePath": "/qr/personal/maybank-savings-qr-idzhans.jpeg"
+    },
+    {
+      "id": "rhb-savings",
+      "ownerName": "Idzhans Khairi",
+      "accountHolderName": "MUHAMMAD IDZHANS KHAIRI",
+      "bank": "RHB Bank",
+      "accountNumber": "16409400188568",
+      "imagePath": "/qr/personal/rhb-savings-qr-idzhans.jpeg"
+    },
+    {
+      "id": "tng-ewallet",
+      "ownerName": "Idzhans Khairi",
+      "accountHolderName": "MUHAMMAD IDZHANS KHAIRI",
+      "bank": "Touch N Go E-Wallet",
+      "accountNumber": "100566708622",
+      "imagePath": "/qr/personal/tng-ewallet-qr-idzhans.jpeg"
+    }
+  ],
+  "othersQR": []
+}
