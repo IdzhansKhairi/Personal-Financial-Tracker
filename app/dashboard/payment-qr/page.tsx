@@ -93,38 +93,22 @@ export default function PaymentQRPage() {
     };
 
     // Copy text to clipboard using navigator API
-    const copyToClipboard = async (text: string, type: string) => {
+    const copyToClipboard = async (text: string, buttonElement: HTMLButtonElement) => {
         try {
             await navigator.clipboard.writeText(text);
-
-            // Show small success toast instead of big modal
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.onmouseenter = Swal.stopTimer;
-                    toast.onmouseleave = Swal.resumeTimer;
-                }
-            });
-
-            Toast.fire({
-                icon: 'success',
-                title: `${type} copied!`
-            });
+            
+            buttonElement.classList.add('copied');
+            
+            // Revert after 2 seconds
+            setTimeout(() => {
+                buttonElement.classList.remove('copied');
+            }, 2000);
         } catch (err) {
             console.error('Failed to copy: ', err);
-            Swal.fire({
-                icon: 'error',
-                title: 'Copy Failed',
-                text: 'Failed to copy to clipboard. Please select and copy manually.',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000
-            });
+            buttonElement.classList.add('copy-failed');
+            setTimeout(() => {
+                buttonElement.classList.remove('copy-failed');
+            }, 2000);
         }
     };
 
@@ -139,6 +123,8 @@ export default function PaymentQRPage() {
                         <code class='fs-5 px-3 py-1' style="background-color: #f8f9fa; border-radius: 6px;">${qrEntry.accountNumber}</code>
                         <button type="button" class="btn btn-sm btn-outline-secondary copy-btn" data-clipboard-text="${qrEntry.accountNumber}">
                             <i class="bi bi-clipboard"></i>
+                            <i class="bi bi-check-lg text-white"></i>
+                            <i class="bi bi-x-lg text-white"></i>
                         </button>
                     </div>
                 </div>
@@ -186,7 +172,7 @@ export default function PaymentQRPage() {
                         const target = e.currentTarget as HTMLButtonElement;
                         const text = target.getAttribute('data-clipboard-text');
                         if (text) {
-                            copyToClipboard(text, 'Account Number');
+                            copyToClipboard(text, target);
                         }
                     });
                 }

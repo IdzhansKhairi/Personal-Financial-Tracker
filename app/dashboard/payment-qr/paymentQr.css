@@ -107,3 +107,98 @@
 .qr-toggle-buttons .btn {
   min-width: 120px;
 }
+
+/* Smooth transitions for Copy button and its icons */
+.copy-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0 !important;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.1s ease;
+}
+
+.copy-btn:active {
+  transform: scale(0.9);
+}
+
+.copy-btn .bi {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  font-size: 0.95rem;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+}
+
+/* Default state: clipboard visible, success/fail icons hidden and scaled down */
+.copy-btn .bi-clipboard {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.copy-btn .bi-check-lg,
+.copy-btn .bi-x-lg {
+  opacity: 0;
+  transform: scale(0) rotate(-45deg);
+}
+
+/* Success state styles and animations */
+.copy-btn.copied {
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+  color: #ffffff !important;
+}
+
+.copy-btn.copied:hover,
+.copy-btn.copied:focus,
+.copy-btn.copied:active {
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+  color: #ffffff !important;
+}
+
+.copy-btn.copied .bi-clipboard {
+  opacity: 0;
+  transform: scale(0) rotate(45deg);
+}
+
+.copy-btn.copied .bi-check-lg {
+  opacity: 1;
+  transform: scale(1.1) rotate(0deg);
+}
+
+/* Error state styles and animations */
+.copy-btn.copy-failed {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: #ffffff !important;
+}
+
+.copy-btn.copy-failed:hover,
+.copy-btn.copy-failed:focus,
+.copy-btn.copy-failed:active {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: #ffffff !important;
+}
+
+.copy-btn.copy-failed .bi-clipboard {
+  opacity: 0;
+  transform: scale(0) rotate(45deg);
+}
+
+.copy-btn.copy-failed .bi-x-lg {
+  opacity: 1;
+  transform: scale(1.1) rotate(0deg);
+}
+

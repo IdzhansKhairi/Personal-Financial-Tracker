@@ -46,8 +46,12 @@ export default function Sidebar({ isOpen, onMenuClick }: SidebarProps) {
 
   // Handle menu item click - close sidebar on mobile + trigger loading
   const handleMenuClick = (info: any) => {
-    // Show loading overlay when navigating to a different page
-    startNavigation();
+    const currentActiveKeys = getActiveKey();
+    
+    // Only show loading overlay when navigating to a different page
+    if (info.key && !currentActiveKeys.includes(info.key)) {
+      startNavigation();
+    }
 
     if (typeof window !== 'undefined' && window.innerWidth <= 768 && onMenuClick) {
       onMenuClick();
