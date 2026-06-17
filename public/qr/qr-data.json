@@ -33,5 +33,30 @@
       "imagePath": "/qr/personal/tng-ewallet-qr-idzhans.jpeg"
     }
   ],
-  "othersQR": []
+  "othersQR": [
+    {
+      "id": "maybank-savings-lenard-yang",
+      "ownerName": "Lenard Yang",
+      "accountHolderName": "LENARD YANG PENG JIAN",
+      "bank": "Maybank (Savings)",
+      "accountNumber": "112688164083",
+      "imagePath": "/qr/others/maybank-savings-qr-lenardYang.jpeg"
+    },
+    {
+      "id": "maybank-mae-ariff-hafizal",
+      "ownerName": "Ariff Hafizal",
+      "accountHolderName": "ARIFF HAFIZAL BIN AHMAD HUSNI",
+      "bank": "Maybank (MAE)",
+      "accountNumber": "512521259231",
+      "imagePath": "/qr/others/maybank-mae-qr-ariffHafizal.jpeg"
+    },
+    {
+      "id": "bankIslam-idzhans-qr-mama",
+      "ownerName": " Mama",
+      "accountHolderName": "MUHAMMAD IDZHANS KHAIRI",
+      "bank": "Bank Islam",
+      "accountNumber": "12113025100269",
+      "imagePath": "/qr/others/bankIslam-idzhans-qr-mama.jpg"
+    }
+  ]
 }
