@@ -467,7 +467,11 @@ export class CommitmentPaymentsAdapter {
       const { data, error } = await query
 
       if (error) throw error
-      return data || []
+      return (data || []).map((item: any) => ({
+        ...item,
+        commitment_name: item.commitment_list_table?.commitment_name,
+        commitment_list_table: undefined
+      }))
     } else {
       const db = await openDB()
       let query = `
@@ -958,7 +962,16 @@ export class FinancingInstallmentsAdapter {
         .order('due_date', { ascending: true })
 
       if (error) throw error
-      return data || []
+      return (data || [])
+        .map((item: any) => ({
+          ...item,
+          financing_name: item.financing_plan_table?.financing_name,
+          financing_provider: item.financing_plan_table?.financing_provider,
+          financing_category: item.financing_plan_table?.financing_category,
+          plan_status: item.financing_plan_table?.status,
+          financing_plan_table: undefined
+        }))
+        .filter((item: any) => item.plan_status === 'active')
     } else {
       const db = await openDB()
       const monthStr = String(month + 1).padStart(2, '0')
