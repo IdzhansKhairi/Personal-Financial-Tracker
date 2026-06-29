@@ -57,6 +57,14 @@
       "bank": "Bank Islam",
       "accountNumber": "12113025100269",
       "imagePath": "/qr/others/bankIslam-idzhans-qr-mama.jpg"
+    },
+    {
+      "id": "maybank-savings-qr-liyanaBatrisya",
+      "ownerName": "Liyana Batrisya",
+      "accountHolderName": "NUR LIYANA BATRISYA BINTI AZHAR",
+      "bank": "Maybank (Savings)",
+      "accountNumber": "151584321342",
+      "imagePath": "/qr/others/maybank-savings-qr-liyanaBatrisya.jpeg"
     }
   ]
 }
