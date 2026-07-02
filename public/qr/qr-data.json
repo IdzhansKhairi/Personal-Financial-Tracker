@@ -35,6 +35,14 @@
   ],
   "othersQR": [
     {
+      "id": "bankIslam-idzhans-qr-mama",
+      "ownerName": " Mama",
+      "accountHolderName": "MUHAMMAD IDZHANS KHAIRI",
+      "bank": "Bank Islam",
+      "accountNumber": "12113025100269",
+      "imagePath": "/qr/others/bankIslam-idzhans-qr-mama.jpg"
+    },
+    {
       "id": "maybank-savings-lenard-yang",
       "ownerName": "Lenard Yang",
       "accountHolderName": "LENARD YANG PENG JIAN",
@@ -51,20 +59,20 @@
       "imagePath": "/qr/others/maybank-mae-qr-ariffHafizal.jpeg"
     },
     {
-      "id": "bankIslam-idzhans-qr-mama",
-      "ownerName": " Mama",
-      "accountHolderName": "MUHAMMAD IDZHANS KHAIRI",
-      "bank": "Bank Islam",
-      "accountNumber": "12113025100269",
-      "imagePath": "/qr/others/bankIslam-idzhans-qr-mama.jpg"
-    },
-    {
       "id": "maybank-savings-qr-liyanaBatrisya",
       "ownerName": "Liyana Batrisya",
       "accountHolderName": "NUR LIYANA BATRISYA BINTI AZHAR",
       "bank": "Maybank (Savings)",
       "accountNumber": "151584321342",
       "imagePath": "/qr/others/maybank-savings-qr-liyanaBatrisya.jpeg"
+    },
+    {
+      "id": "maybank-savings-qr-luqmanHakim",
+      "ownerName": "Luqman Hakim",
+      "accountHolderName": "LUQMAN HAKIM BIN MD SHANI",
+      "bank": "Maybank (Savings)",
+      "accountNumber": "164258669388",
+      "imagePath": "/qr/others/maybank-savings-qr-luqmanHakim.png"
     }
   ]
 }
